@@ -28,7 +28,7 @@ import {UserListComponent} from './home/user-list/user-list.component';
 import {ForgotPasswordComponent} from './forgot-password/forgot-password.component';
 import { NotificationListComponent } from './notification/notification.component';
 import { NotificationService } from './notification/notification.service';
-
+import { MatPaginatorModule } from '@angular/material';
 
 
 @NgModule({
@@ -62,6 +62,7 @@ import { NotificationService } from './notification/notification.service';
         SatDatepickerModule,
         MatNativeDateModule,
         MatGridListModule,
+        MatPaginatorModule 
     ],
   providers: [CsvDataService, NotificationService],
   bootstrap: [AppComponent]
