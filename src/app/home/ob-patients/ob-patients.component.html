@@ -1,15 +1,20 @@
 <app-notification></app-notification>
 <section class="row mlr0 navbar-block">
   <div class="col-md-3">
-    <img class="logo" alt="logo" src="../../assets/logo2.png"/>
+    <img class="logo" alt="logo" src="../../assets/logo2.png" />
   </div>
-  <div class="col-md-9 p0">
+  <div class="col-md-9 col-sm-12 col-xs-12 p0">
     <ul class="custom-breadcrumb">
       <li>
         <a href="javascript:void(0)" (click)="gotoDashboardPage()">Dashboard</a>
       </li>
       <li>
-        <a href="javascript:void(0)" class="active" (click)="patientsTypeSelection()">Patients</a>
+        <a
+          href="javascript:void(0)"
+          class="active"
+          (click)="patientsTypeSelection()"
+          >Patients</a
+        >
       </li>
       <li>
         <a href="javascript:void(0)">MD to MD</a>
@@ -23,44 +28,154 @@
     </ul>
   </div>
 </section>
-<section class="row mlr0 ob-patients-block">
-    <div class="row col-md-12">
-      <div class="row col-6 offset-6">
-      <div class="col-md-auto">
-        <button type="button" class="btn btn-primary" (click)="goToAddPatient()">Add New Patient</button>
+<section class="row ob-patients-block mx-0 px-5">
+  <div class="row col-md-12 mx-0 p0 mt-2">
+    <div class="offset-md-7 col-md-5 col-sm-12 col-xs-12 p0">
+      <ul class="custom-breadcrumb pull-right">
+        <li class="ml-2">
+          <button type="button" class="btn btn-info" (click)="goToAddPatient()">
+            <i class="fa fa-plus-circle"></i> Add New Patient
+          </button>
+        </li>
+        <li class="ml-2">
+          <button
+            type="button"
+            class="btn btn-success"
+            (click)="goToAddPatient()"
+          >
+            Census
+          </button>
+        </li>
+        <li class="ml-2">
+          <button
+            type="button"
+            class="btn btn-warning"
+            (click)="goToAddPatient()"
+          >
+            IN Patients
+          </button>
+        </li>
+        <li class="ml-2 pull-right">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="goToAddPatient()"
+          >
+            Discharged
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="row col-md-12 mx-0 p0 mt-4">
+    <div class="card col-md-12 p0 m0">
+      <div class="card-header text-white bg-info">
+        <h5><i class="fa fa-calendar" aria-hidden="true"></i> OB</h5>
       </div>
-    <div class="col-md-auto">
-      <button type="button" class="btn btn-primary" (click)="goToAddPatient()">Census</button>
+      <div class="card-body">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">First</th>
+              <th scope="col">Last</th>
+              <th scope="col">Handle</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">1</th>
+              <td>Mark</td>
+              <td>Otto</td>
+              <td>@mdo</td>
+            </tr>
+            <tr>
+              <th scope="row">2</th>
+              <td>Jacob</td>
+              <td>Thornton</td>
+              <td>@fat</td>
+            </tr>
+            <tr>
+              <th scope="row">3</th>
+              <td colspan="2">Larry the Bird</td>
+              <td>@twitter</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-    <div class="col-md-auto">
-      <button type="button" class="btn btn-primary" (click)="goToAddPatient()">IN Patients</button>
+  </div>
+  <div class="row col-md-12 mx-0 p0 mt-4">
+    <div class="card col-md-12 p0">
+      <div class="card-header text-white bg-info">
+        <h5><i class="fa fa-calendar" aria-hidden="true"></i> GYN</h5>
+      </div>
+      <div class="card-body">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">First</th>
+              <th scope="col">Last</th>
+              <th scope="col">Handle</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">1</th>
+              <td>Mark</td>
+              <td>Otto</td>
+              <td>@mdo</td>
+            </tr>
+            <tr>
+              <th scope="row">2</th>
+              <td>Jacob</td>
+              <td>Thornton</td>
+              <td>@fat</td>
+            </tr>
+            <tr>
+              <th scope="row">3</th>
+              <td colspan="2">Larry the Bird</td>
+              <td>@twitter</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-    <div class="col-md-auto">
-      <button type="button" class="btn btn-primary" (click)="goToAddPatient()">Discharged</button>
-    </div>
-    </div>
-    </div>
-<div class="report-section-content search-results">
-  <a
-    class="report-section-item a-hyperlink"
-    *ngFor="let item of tempPatientsList; let i=index" (click)="goToUpdatePatient(item)">
-    <mat-card-header [ngStyle]="{'background-color': item.color }">
-      <mat-card-title>{{item.avatar}}</mat-card-title>
 
-    </mat-card-header>
-    <div
-      class="report-section-item-infos"
-      style="width:95%"
+    <!-- <a
+      class="report-section-item a-hyperlink"
+      *ngFor="let item of tempPatientsList; let i = index"
+      (click)="goToUpdatePatient(item)"
     >
-      <div class="report-section-item-description">
-                                    <span class="tile-text">
-                                        <p>{{item.mstUsers.firstName}} {{item.mstUsers.lastName}}
-      </p>
-      <p class="discrib" *ngIf="item.patientPertinentInfoList != null && item.patientPertinentInfoList.length > 0">{{item.patientPertinentInfoList[0][item.daysList[0]][0].pertinentInfo}}</p>
-      <p class="roomnumber">{{item.hospital.description}} {{item.roomNumber}}</p>
-      <p class="date">{{appService.dateFormat(item.admittedDate,'MMM Do')}}</p>
-                                    </span>
-      </div>
-    </div></a>
-</div>
+      <mat-card-header [ngStyle]="{ 'background-color': item.color }">
+        <mat-card-title>{{ item.avatar }}</mat-card-title>
+      </mat-card-header>
+      <div class="report-section-item-infos" style="width: 95%">
+        <div class="report-section-item-description">
+          <span class="tile-text">
+            <p>{{ item.mstUsers.firstName }} {{ item.mstUsers.lastName }}</p>
+            <p
+              class="discrib"
+              *ngIf="
+                item.patientPertinentInfoList != null &&
+                item.patientPertinentInfoList.length > 0
+              "
+            >
+              {{
+                item.patientPertinentInfoList[0][item.daysList[0]][0]
+                  .pertinentInfo
+              }}
+            </p>
+            <p class="roomnumber">
+              {{ item.hospital.description }} {{ item.roomNumber }}
+            </p>
+            <p class="date">
+              {{ appService.dateFormat(item.admittedDate, "MMM Do") }}
+            </p>
+          </span>
+        </div>
+      </div></a
+    > -->
+  </div>
 </section>
