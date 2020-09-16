@@ -1,0 +1,37 @@
+<app-notification></app-notification>
+<section class="row mlr0 navbar-block">
+  <div class="col-md-3">
+    <img class="logo" alt="logo" src="../../assets/logo2.png"/>
+  </div>
+  <div class="col-md-9 p0">
+    <ul class="custom-breadcrumb">
+      <li>
+        <a href="javascript:void(0)" class="active" (click)="gotoDashboard()">Dashboard</a>
+      </li>
+      <li>
+        <a href="javascript:void(0)" (click)="patientsTypeSelection()">Patients</a>
+      </li>
+      <li>
+        <a href="javascript:void(0)">MD to MD</a>
+      </li>
+      <li>
+        <a href="javascript:void(0)">Schedule</a>
+      </li>
+      <li>
+        <a href="javascript:void(0)" (click)="goToAnlyticsPage()">Analytics</a>
+      </li>
+    </ul>
+  </div>
+</section>
+<section class="display-body row mlr0">
+  <div class="col-md-4">
+    <app-charts-view *ngIf="plotDetailsmonth" [idthing] = "'plotDetailsmonth'" [chartData] = plotDetailsmonth [header] = "'Monthly HEOR Field Activity-June,2020'"></app-charts-view>
+  </div>
+  <div class="col-md-4">
+    <app-charts-view *ngIf="plotDetailsyear"  [idthing] = "'plotDetailsyear'" [chartData] = "plotDetailsyear" [header] = "'Yearly HEOR Field Activity-June,2020'"></app-charts-view>
+  </div>
+  <div class="col-md-4">
+    <app-charts-view *ngIf="plotDetailsdate"  [idthing] = "'plotDetailsdate'" [chartData] = "plotDetailsdate" [header] = "'Date HEOR Field Activity-June,2020'"></app-charts-view>
+  </div>
+</section>
+

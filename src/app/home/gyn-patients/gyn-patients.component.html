@@ -1,0 +1,27 @@
+I am Gyn Patients
+
+<app-notification></app-notification>
+<div class="report-section-content search-results">
+  <a
+    class="report-section-item a-hyperlink"
+    *ngFor="let item of tempPatientsList; let i=index" (click)="goToUpdatePatient(item)">
+    <mat-card-header [ngStyle]="{'background-color': item.color }">
+      <mat-card-title>{{item.avatar}}</mat-card-title>
+
+    </mat-card-header>
+    <div
+      class="report-section-item-infos"
+      style="width:95%"
+    >
+      <div class="report-section-item-description">
+                                    <span class="tile-text">
+                                        <p>{{item.mstUsers.firstName}} {{item.mstUsers.lastName}}
+      </p>
+      <p class="discrib" *ngIf="item.patientPertinentInfoList != null && item.patientPertinentInfoList.length > 0">{{item.patientPertinentInfoList[0][item.daysList[0]][0].pertinentInfo}}</p>
+      <p class="roomnumber">{{item.hospital.description}} {{item.roomNumber}}</p>
+      <p class="date">{{appService.dateFormat(item.admittedDate,'MMM Do')}}</p>
+                                    </span>
+      </div>
+    </div></a>
+</div>
+

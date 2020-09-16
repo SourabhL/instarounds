@@ -1,0 +1,221 @@
+<app-notification></app-notification>
+<section class="row mlr0 navbar-block">
+  <div class="col-md-3">
+    <img class="logo" alt="logo" src="../../assets/logo2.png"/>
+  </div>
+  <div class="col-md-9 p0">
+    <ul class="custom-breadcrumb">
+      <li>
+        <a href="javascript:void(0)" (click)="gotoDashboardPage()">Dashboard</a>
+      </li>
+      <li>
+        <a href="javascript:void(0)" (click)="patientsTypeSelection()">Patients</a>
+      </li>
+      <li>
+        <a href="javascript:void(0)">MD to MD</a>
+      </li>
+      <li>
+        <a href="javascript:void(0)">Schedule</a>
+      </li>
+      <li>
+        <a href="javascript:void(0)" class="active" (click)="goToAnlyticsPage()">Analytics</a>
+      </li>
+    </ul>
+  </div>
+</section>
+<section class="row mlr0 anlytiks-block">
+  <div class="col-md-9">
+    <section class="anlytiks-results">
+      <div class="row mlr0">
+        <div class="col-md-4 p0">
+          <mat-form-field appearance="fill">
+            <mat-label>Graph Type:</mat-label>
+            <select matNativeControl [(ngModel)]="graphType" (ngModelChange)= "changeGraphType()" name="graphType">
+              <option value="pie">PIE</option>
+              <option value="bar">BAR</option>
+            </select>
+          </mat-form-field>
+        </div>
+        <div class="col-md-8 p0">
+          <button class="icon-btn pull-right mt10" title="Download CSV" (click)="downloadCSV()">
+            <i class="fa fa-download" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+      <div class="col-md-12 p0">
+        <app-charts-view *ngIf="plotDetails" [idthing] = "'analysisGraph'" [type]="graphType" [chartData] = plotDetails></app-charts-view>
+      </div>
+    </section>
+
+  </div>
+  <div class="col-md-3 pl0">
+    <div class="row mlr0 anlytiks-filters clear-fix">
+      <mat-form-field appearance="fill">
+        <mat-label>From Date</mat-label>
+        <input matInput [matDatepicker]="picker1" [(ngModel)]="analyticData.fromDate" >
+        <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+        <mat-datepicker #picker1></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>To Date</mat-label>
+        <input matInput [matDatepicker]="picker2" [(ngModel)]="analyticData.toDate">
+        <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+        <mat-datepicker #picker2></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Patient Type:</mat-label>
+        <select matNativeControl [(ngModel)]="analyticData.patientTypeId" name="car"
+                (ngModelChange)="onAnlyticsChange($event)">
+          <option *ngFor="let patient of patientTypeList" [value]="patient">
+            {{patient}}
+          </option>
+        </select>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Statistical:</mat-label>
+        <select matNativeControl [(ngModel)]="analyticData.statType" name="car"
+                (ngModelChange)="onStatisticalChange($event)">
+          <option value="avg">Average</option>
+        </select>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Patient Status:</mat-label>
+        <select matNativeControl [(ngModel)]="analyticData.admissionStatus" name="car"
+                (ngModelChange)="onPatientStatusChange($event)">
+          <option *ngFor="let patient of patientStatusList" [value]="patient">
+            {{patient}}
+          </option>
+        </select>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Hospital:</mat-label>
+        <select matNativeControl [(ngModel)]="analyticData.hospitalID" name="car"
+                (ngModelChange)="onhospitalChange($event)">
+          <option *ngFor="let hospital of hospitalList" [value]="hospital.id">
+            {{hospital.name}}
+          </option>
+        </select>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>ByYrMnDt:</mat-label>
+        <select matNativeControl [(ngModel)]="analyticData.byYrMn" name="car2">
+          <option value="year">Year</option>
+          <option value="month">Month</option>
+          <option value="date">Date</option>
+        </select>
+      </mat-form-field>
+      <section *ngIf="analyticData.patientTypeId === 'OB'">
+        <mat-form-field appearance="fill">
+          <mat-label>GBS(+/-):</mat-label>
+          <select matNativeControl [(ngModel)]="analyticData.gbs" name="car" (ngModelChange)="onGBSChange($event)">
+            <option value="1">+ve</option>
+            <option value="2">-ve</option>
+            <option value="3">Unknown</option>
+          </select>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Procedure:</mat-label>
+          <select matNativeControl [(ngModel)]="analyticData.procedureTypesId" name="car"
+                  (ngModelChange)="onProcedureChange($event)">
+            <option *ngFor="let procedure of obProcedureList" [value]="procedure.id">
+              {{procedure.name}}
+            </option>
+          </select>
+        </mat-form-field>
+        <div *ngIf="procedureType === 'C-Section'">
+          <mat-form-field appearance="fill">
+            <mat-label>C-Section Reason :</mat-label>
+            <select matNativeControl [(ngModel)]="analyticData.csecReason" name="car"
+                    (ngModelChange)="CSectionReasonChange($event)">
+              <option *ngFor="let procedure of csectionReasonList" [value]="procedure.id">
+                {{procedure.reason}}
+              </option>
+            </select>
+          </mat-form-field>
+        </div>
+        <mat-form-field appearance="fill">
+          <mat-label>Induced :</mat-label>
+          <select matNativeControl multiple="true" [(ngModel)]="selectedInduse" name="car"
+                  (ngModelChange)="inducedreasionTypeselect($event)">
+            <option *ngFor="let induced of inReason" [value]="induced.id">
+              {{induced.irName}}
+            </option>
+          </select>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Baby Type :</mat-label>
+          <select matNativeControl multiple="true" [(ngModel)]="analyticData.babyInfo" name="car"
+                  (ngModelChange)="onBabyTypeChange($event)">
+            <option value="1">Singleton</option>
+            <option value="2">Twins</option>
+            <option value="3">Other</option>
+          </select>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Sex Of Baby :</mat-label>
+          <select matNativeControl multiple="true" [(ngModel)]="analyticData.babyGender" name="car"
+                  (ngModelChange)="onBabySexChange($event)">
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+          </select>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>APGAR :</mat-label>
+          <select matNativeControl multiple="true" [(ngModel)]="analyticData.apgar" name="car"
+                  (ngModelChange)="onBabyApgarChange($event)">
+            <option value="{{babyAPGARLes}}">{{babyAPGARLes}}</option>
+            <option value="{{babyAPGARGa}}">{{babyAPGARGa}}</option>
+          </select>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Live Birth :</mat-label>
+          <select matNativeControl multiple="true" [(ngModel)]="analyticData.liveBirth" name="car"
+                  (ngModelChange)="onlivebirthChange($event)">
+            <option value="YES">YES</option>
+            <option value="NO">NO</option>
+          </select>
+        </mat-form-field>
+      </section>
+      <section *ngIf="analyticData.patientTypeId === 'GYN'">
+        <mat-form-field appearance="fill">
+          <mat-label>Procedure :</mat-label>
+          <select matNativeControl [(ngModel)]="selectedProcedure" name="car"
+                  (ngModelChange)="onGYNProcedureChange($event)">
+            <option *ngFor="let procedure of gynProcedureList" [value]="procedure.id">
+              {{procedure.procedureName}}
+            </option>
+          </select>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Post-op Antiboitics :</mat-label>
+          <select matNativeControl [(ngModel)]="analyticData.postop" name="car"
+                  (ngModelChange)="onpostopChange($event)">
+            <option value="YES">YES</option>
+            <option value="NO">NO</option>
+          </select>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>EBL :</mat-label>
+          <select matNativeControl [(ngModel)]="analyticData.ebl" name="car" (ngModelChange)="onEblChange($event)">
+            <option value="{{EBLLes}}">{{EBLLes}}</option>
+            <option value="100-300 cc">100-300 cc</option>
+            <option value="300-700 cc">300-700 cc</option>
+            <option value="{{EBLGa}}">{{EBLGa}}</option>
+          </select>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>EBL :</mat-label>
+          <select matNativeControl [(ngModel)]="analyticData.fcm" name="car" (ngModelChange)="onCatheterChange($event)">
+            <option value="D/C">D/C</option>
+            <option value="Voiding Trial">Voiding Trial</option>
+            <option value="Keep">Keep</option>
+          </select>
+        </mat-form-field>
+      </section>
+    </div>
+    <button class="blue-btn mr10" (click)="clear()">Clear</button>
+    <button class="blue-btn" (click)="getAnalytics()">Submit</button>
+  </div>
+</section>
+
+

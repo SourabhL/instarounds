@@ -1,0 +1,30 @@
+<app-notification></app-notification>
+
+<div class="login-block">
+  <div class="login-form">
+    <div class="login-header">
+      <img src="../../assets/logo.png" alt="logo">
+    </div>
+    <div class="login-body">
+      <h2>SIGN IN</h2>
+      <form>
+        <div class="control-group">
+          <input class="form-input" placeholder="Username" [(ngModel)]="username" name="username" required>
+        </div>
+        <div class="control-group">
+          <input  class="form-input"  placeholder="Password" [(ngModel)]="password" type="password" name="password" required>
+        </div>
+      </form>
+      <div class="submit clear-fix">
+        <button class="btn blue-btn" >New User</button>
+        <button  class="btn blue-btn pull-right"  (click)="login()">Sign in</button>
+      </div>
+      <div class="forget">
+        <a href="#"><span>Forgot password?</span></a>
+      </div>
+      <mat-spinner [style.display]="showSpinner ? 'block' : 'none'"></mat-spinner>
+    </div>
+  </div>
+</div>
+
+

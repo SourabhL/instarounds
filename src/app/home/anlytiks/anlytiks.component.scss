@@ -1,0 +1,39 @@
+@import "../home.component";
+.anlytiks-block{
+  padding-top: 15px;
+  margin-top: 4px;
+}
+.anlytiks-filters{
+  border: 1px solid #e1e1e1;
+  padding: 10px;
+  background: #ededed;
+  box-shadow: 0 1px 2px #e1e1e1;
+  max-height: 77vh;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  mat-form-field{
+    width: 48%;
+    &:nth-child(even){
+      margin-left: 2%;
+    }
+    &:nth-child(odd){
+      margin-right: 2%;
+    }
+  }
+}
+.anlytiks-filters .mat-form-field-appearance-fill .mat-form-field-flex {
+  background: #fff!important;
+  border-radius: 0!important;
+}
+.anlytiks-results{
+  background: #fff;
+  border: 1px solid #efefef;
+  height: 77vh;
+  overflow-y: auto;
+  padding: 10px 15px;
+}
+@media(min-width: 768px) and (max-width:1366px){
+  .anlytiks-results, .anlytiks-filters{
+    height: 68vh;
+  }
+}
