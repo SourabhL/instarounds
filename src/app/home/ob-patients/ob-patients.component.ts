@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import { HomeService } from "../../services/home.service";
 import { NotificationService } from "../../notification/notification.service";
 import { NavigationExtras, Router } from "@angular/router";
@@ -8,78 +8,33 @@ import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 
-export interface UserData {
-  id: string;
-  progress: string;
-  name: string;
-  color: string;
-  admission: string;
-  action: string;
+export interface ObPatientsData {
+  fullName: string;
+  roomNumber: string;
+  gsPs: string;
+  edd: string;
+  admissionStatus: string;
+  actions: string;
 }
-
-/** Constants used to fill up our data base. */
-const COLORS: string[] = [
-  "maroon",
-  "red",
-  "orange",
-  "yellow",
-  "olive",
-  "green",
-  "purple",
-  "fuchsia",
-  "lime",
-  "teal",
-  "aqua",
-  "blue",
-  "navy",
-  "black",
-  "gray",
-];
-const NAMES: string[] = [
-  "Maia",
-  "Asher",
-  "Olivia",
-  "Atticus",
-  "Amelia",
-  "Jack",
-  "Charlotte",
-  "Theodore",
-  "Isla",
-  "Oliver",
-  "Isabella",
-  "Jasper",
-  "Cora",
-  "Levi",
-  "Violet",
-  "Arthur",
-  "Mia",
-  "Thomas",
-  "Elizabeth",
-];
 
 @Component({
   selector: "app-ob-patients",
   styleUrls: ["./ob-patients.component.scss"],
   templateUrl: "./ob-patients.component.html",
 })
-export class ObPatientsComponent implements OnInit, AfterViewInit {
+export class ObPatientsComponent implements OnInit {
   displayedColumns: string[] = [
-    "id",
-    "progress",
-    "name",
-    "color",
-    "admission",
-    "action",
+    "fullName",
+    "roomNumber",
+    "gsPs",
+    "edd",
+    "admissionStatus",
+    "actions"
   ];
-  dataSource: MatTableDataSource<UserData>;
+  dataSource: MatTableDataSource<ObPatientsData>;
 
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
-  @ViewChild(MatSort, { static: true }) sort: MatSort;
-
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
-  }
+  @ViewChild(MatSort, { static: false }) sort: MatSort;
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -93,7 +48,8 @@ export class ObPatientsComponent implements OnInit, AfterViewInit {
     const dialogConfig = new MatDialogConfig();
     this.dialog.open(DialogContentExampleDialog, dialogConfig);
   }
-  patientsList = [];
+  obPatientsList = [];
+  gynPatientsList = [];
   tempPatientsList = [];
   constructor(
     private loginSer: HomeService,
@@ -101,11 +57,10 @@ export class ObPatientsComponent implements OnInit, AfterViewInit {
     private router: Router,
     public dialog: MatDialog
   ) {
-    // Create 100 users
-    const users = Array.from({ length: 100 }, (_, k) => createNewUser(k + 1));
 
-    // Assign the data to the data source for the table to render
-    this.dataSource = new MatTableDataSource(users);
+    // // Assign the data to the data source for the table to render
+    // this.dataSource = new MatTableDataSource(this.patientsList);
+
   }
 
   ngOnInit() {
@@ -113,22 +68,26 @@ export class ObPatientsComponent implements OnInit, AfterViewInit {
   }
 
   getPatients() {
-    this.patientsList = [];
+    this.obPatientsList = [];
     this.tempPatientsList = [];
     // this.appService.showLoader();
     this.loginSer
-      .fetchPatients(environment.api.obPatients, false)
+      .fetchPatients(environment.api.showPatients, "census")
       .subscribe((data: any) => {
-        console.log(data.data);
+
         // this.appService.hideLoader();
         if (data._statusCode === "200") {
-          this.patientsList = data.data.patientDetails;
-          console.log(this.patientsList);
-          this.patientsList.forEach((item: any) => {
+          this.obPatientsList = data.data.obPatientsList;
+          this.gynPatientsList = data.data.gynPatientsList;
+          this.obPatientsList = data.data.obPatientsList.map(val=>({...val,fullName:`${val.mstUsers.firstName} ${val.mstUsers.lastName}`}));
+          this.dataSource = new MatTableDataSource(this.obPatientsList);
+          this.dataSource.paginator = this.paginator;
+          this.dataSource.sort = this.sort;
+          this.obPatientsList.forEach((item: any) => {
             item.avatar = item.mstUsers.firstName.substring(0, 1);
             item.color = this.appService.getRandomColor();
           });
-          this.tempPatientsList = this.patientsList;
+          this.tempPatientsList = this.obPatientsList;
         } else if (!data.status) {
           this.goToLoginScreen();
         } else {
@@ -144,13 +103,13 @@ export class ObPatientsComponent implements OnInit, AfterViewInit {
   searchHandler(event): void {
     const val = event.target.value;
     if (val && val.trim() !== "") {
-      this.tempPatientsList = this.patientsList.filter((item: any) => {
+      this.tempPatientsList = this.obPatientsList.filter((item: any) => {
         return (
           item.mstUsers.firstName.toLowerCase().indexOf(val.toLowerCase()) > -1
         );
       });
     } else {
-      this.tempPatientsList = this.patientsList;
+      this.tempPatientsList = this.obPatientsList;
     }
   }
 
@@ -231,24 +190,6 @@ export class ObPatientsComponent implements OnInit, AfterViewInit {
     localStorage.setItem("deviceId", "");
     this.router.navigateByUrl("/login");
   }
-}
-
-/** Builds and returns a new User. */
-function createNewUser(id: number): UserData {
-  const name =
-    NAMES[Math.round(Math.random() * (NAMES.length - 1))] +
-    " " +
-    NAMES[Math.round(Math.random() * (NAMES.length - 1))].charAt(0) +
-    ".";
-
-  return {
-    id: id.toString(),
-    name: name,
-    progress: Math.round(Math.random() * 100).toString(),
-    color: COLORS[Math.round(Math.random() * (COLORS.length - 1))],
-    admission: "IN",
-    action: "view/edit",
-  };
 }
 @Component({
   selector: "dialog-content-example-dialog",

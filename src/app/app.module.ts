@@ -32,6 +32,7 @@ import { ForgotPasswordComponent } from "./forgot-password/forgot-password.compo
 import { NotificationListComponent } from "./notification/notification.component";
 import { NotificationService } from "./notification/notification.service";
 import { MatPaginatorModule } from "@angular/material";
+import { MatSortModule } from "@angular/material";
 import { MatDialogModule } from "@angular/material";
 
 @NgModule({
@@ -67,6 +68,7 @@ import { MatDialogModule } from "@angular/material";
     MatNativeDateModule,
     MatGridListModule,
     MatPaginatorModule,
+    MatSortModule,
     MatDialogModule,
   ],
   entryComponents: [AppComponent, DialogContentExampleDialog],

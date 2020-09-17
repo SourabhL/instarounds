@@ -1,27 +1,94 @@
-I am Gyn Patients
-
-<app-notification></app-notification>
-<div class="report-section-content search-results">
-  <a
-    class="report-section-item a-hyperlink"
-    *ngFor="let item of tempPatientsList; let i=index" (click)="goToUpdatePatient(item)">
-    <mat-card-header [ngStyle]="{'background-color': item.color }">
-      <mat-card-title>{{item.avatar}}</mat-card-title>
-
-    </mat-card-header>
-    <div
-      class="report-section-item-infos"
-      style="width:95%"
-    >
-      <div class="report-section-item-description">
-                                    <span class="tile-text">
-                                        <p>{{item.mstUsers.firstName}} {{item.mstUsers.lastName}}
-      </p>
-      <p class="discrib" *ngIf="item.patientPertinentInfoList != null && item.patientPertinentInfoList.length > 0">{{item.patientPertinentInfoList[0][item.daysList[0]][0].pertinentInfo}}</p>
-      <p class="roomnumber">{{item.hospital.description}} {{item.roomNumber}}</p>
-      <p class="date">{{appService.dateFormat(item.admittedDate,'MMM Do')}}</p>
-                                    </span>
+    <div class="card col-md-12 p0 m0">
+      <div class="card-header text-white bg-info">
+        <h5><i class="fa fa-calendar" aria-hidden="true"></i> GYN</h5>
       </div>
-    </div></a>
-</div>
+      <div class="card-body">
+        <div class="pull-right">
+          <mat-form-field>
+            <mat-label>Search</mat-label>
+            <input
+              matInput
+              (keyup)="applyFilter($event)"
+              placeholder=""
+              #input
+            />
+          </mat-form-field>
+        </div>
+      </div>
+      <table mat-table [dataSource]="dataSource" matSort>
 
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+          <td mat-cell *matCellDef="let row">{{ row.mstUsers.firstName }}</td>
+        </ng-container>
+
+
+        <ng-container matColumnDef="roomNumber">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Room Number</th>
+          <td mat-cell *matCellDef="let row">{{ row.roomNumber }}</td>
+        </ng-container>
+
+
+        <ng-container matColumnDef="admissionStatus">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Admission Status</th>
+          <td mat-cell *matCellDef="let row">
+            <a [routerLink]="">
+              {{ row.admissionStatus }}
+            </a></td>
+        </ng-container>
+
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Actions</th>
+          <td mat-cell *matCellDef="let row">
+            view/edit
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="4">
+            No data matching the filter "{{ input.value }}"
+          </td>
+        </tr>
+      </table>
+      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+
+    <!-- <a
+      class="report-section-item a-hyperlink"
+      *ngFor="let item of tempPatientsList; let i = index"
+      (click)="goToUpdatePatient(item)"
+    >
+      <mat-card-header [ngStyle]="{ 'background-color': item.color }">
+        <mat-card-title>{{ item.avatar }}</mat-card-title>
+      </mat-card-header>
+      <div class="report-section-item-infos" style="width: 95%">
+        <div class="report-section-item-description">
+          <span class="tile-text">
+            <p>{{ item.mstUsers.firstName }} {{ item.mstUsers.lastName }}</p>
+            <p
+              class="discrib"
+              *ngIf="
+                item.patientPertinentInfoList != null &&
+                item.patientPertinentInfoList.length > 0
+              "
+            >
+              {{
+                item.patientPertinentInfoList[0][item.daysList[0]][0]
+                  .pertinentInfo
+              }}
+            </p>
+            <p class="roomnumber">
+              {{ item.hospital.description }} {{ item.roomNumber }}
+            </p>
+            <p class="date">
+              {{ appService.dateFormat(item.admittedDate, "MMM Do") }}
+            </p>
+          </span>
+        </div>
+      </div></a
+    >
+  </div> -->

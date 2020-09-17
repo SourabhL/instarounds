@@ -113,7 +113,7 @@ export class HomeService {
     console.log(message);
   }
 
-  fetchPatients(url: any, search: boolean) {
-    return this.http.get(`${environment.api.baseUrl}${url}token=${localStorage.getItem('deviceToken')}&patSearch=${search}`);
+  fetchPatients(url: any, search: string) {
+    return this.http.get(`${environment.api.baseUrl}${url}token=${localStorage.getItem('deviceToken')}&type=${search}`);
   }
 }
