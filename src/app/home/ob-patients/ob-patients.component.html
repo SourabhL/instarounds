@@ -73,90 +73,146 @@
         <h5><i class="fa fa-calendar" aria-hidden="true"></i> OB</h5>
       </div>
       <div class="card-body">
-
-          <div class="pull-right">
-            <mat-form-field>
-              <mat-label>Filter</mat-label>
-              <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Mia" #input>
-            </mat-form-field>
-          </div>
+        <div class="pull-right">
+          <mat-form-field>
+            <mat-label>Search</mat-label>
+            <input
+              matInput
+              (keyup)="applyFilter($event)"
+              placeholder=""
+              #input
+            />
+          </mat-form-field>
         </div>
-          <table mat-table [dataSource]="dataSource" matSort>
+      </div>
+      <table mat-table [dataSource]="dataSource" matSort>
+        <!-- ID Column -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+          <td mat-cell *matCellDef="let row">{{ row.id }}</td>
+        </ng-container>
 
-            <!-- ID Column -->
-            <ng-container matColumnDef="id">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
-              <td mat-cell *matCellDef="let row"> {{row.id}} </td>
-            </ng-container>
+        <!-- Progress Column -->
+        <ng-container matColumnDef="progress">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Room Number</th>
+          <td mat-cell *matCellDef="let row">{{ row.progress }}%</td>
+        </ng-container>
 
-            <!-- Progress Column -->
-            <ng-container matColumnDef="progress">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header> Progress </th>
-              <td mat-cell *matCellDef="let row"> {{row.progress}}% </td>
-            </ng-container>
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>G's & P's</th>
+          <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+        </ng-container>
 
-            <!-- Name Column -->
-            <ng-container matColumnDef="name">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
-              <td mat-cell *matCellDef="let row"> {{row.name}} </td>
-            </ng-container>
+        <!-- Color Column -->
+        <ng-container matColumnDef="color">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>EDD</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.color }}
+          </td>
+        </ng-container>
 
-            <!-- Color Column -->
-            <ng-container matColumnDef="color">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header> Color </th>
-              <td mat-cell *matCellDef="let row" [style.color]="row.color"> {{row.color}} </td>
-            </ng-container>
+        <ng-container matColumnDef="admission">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            Admission Status
+          </th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.admission }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="action">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Actions</th>
+          <td mat-cell *matCellDef="let row">
+            <a routerLink="/your-link"> {{ row.action }}</a>
+          </td>
+        </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
 
-            <!-- Row shown when there is no matching data. -->
-            <tr class="mat-row" *matNoDataRow>
-              <td class="mat-cell" colspan="4">No data matching the filter "{{input.value}}"</td>
-            </tr>
-          </table>
-          <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
-
-
-
+        <!-- Row shown when there is no matching data. -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="4">
+            No data matching the filter "{{ input.value }}"
+          </td>
+        </tr>
+      </table>
+      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
     </div>
   </div>
-  <div class="row col-md-12 mx-0 p0 mt-4">
-    <div class="card col-md-12 p0">
+  <div class="row col-md-12 mx-0 p0 mt-4 mb-5">
+    <div class="card col-md-12 p0 m0">
       <div class="card-header text-white bg-info">
         <h5><i class="fa fa-calendar" aria-hidden="true"></i> GYN</h5>
       </div>
       <div class="card-body">
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">First</th>
-              <th scope="col">Last</th>
-              <th scope="col">Handle</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">1</th>
-              <td>Mark</td>
-              <td>Otto</td>
-              <td>@mdo</td>
-            </tr>
-            <tr>
-              <th scope="row">2</th>
-              <td>Jacob</td>
-              <td>Thornton</td>
-              <td>@fat</td>
-            </tr>
-            <tr>
-              <th scope="row">3</th>
-              <td colspan="2">Larry the Bird</td>
-              <td>@twitter</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="pull-right">
+          <mat-form-field>
+            <mat-label>Search</mat-label>
+            <input
+              matInput
+              (keyup)="applyFilter($event)"
+              placeholder=""
+              #input
+            />
+          </mat-form-field>
+        </div>
       </div>
+      <table mat-table [dataSource]="dataSource" matSort>
+        <!-- ID Column -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+          <td mat-cell *matCellDef="let row">{{ row.id }}</td>
+        </ng-container>
+
+        <!-- Progress Column -->
+        <ng-container matColumnDef="progress">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Room Number</th>
+          <td mat-cell *matCellDef="let row">{{ row.progress }}%</td>
+        </ng-container>
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>G's & P's</th>
+          <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+        </ng-container>
+
+        <!-- Color Column -->
+        <ng-container matColumnDef="color">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>EDD</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.color }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="admission">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            Admission Status
+          </th>
+          <td mat-cell *matCellDef="let row">
+            <button mat-button (click)="openDialog()">
+              {{ row.admission }}
+            </button>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="action">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Actions</th>
+          <td mat-cell *matCellDef="let row">
+            <a routerLink="/your-link"> {{ row.action }}</a>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+        <!-- Row shown when there is no matching data. -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="4">
+            No data matching the filter "{{ input.value }}"
+          </td>
+        </tr>
+      </table>
+      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
     </div>
 
     <!-- <a
