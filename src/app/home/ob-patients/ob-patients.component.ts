@@ -1,73 +1,124 @@
-import {Component, OnInit} from '@angular/core';
-import {HomeService} from '../../services/home.service';
-import {NotificationService} from '../../notification/notification.service';
-import {NavigationExtras, Router} from '@angular/router';
-import {environment} from '../../../environments/environment';
+import { Component, OnInit, ViewChild } from "@angular/core";
+import { HomeService } from "../../services/home.service";
+import { NotificationService } from "../../notification/notification.service";
+import { NavigationExtras, Router } from "@angular/router";
+import { environment } from "../../../environments/environment";
+import { MatPaginator } from "@angular/material/paginator";
+import { MatSort } from "@angular/material/sort";
+import { MatTableDataSource } from "@angular/material/table";
+import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 
+export interface ObPatientsData {
+  fullName: string;
+  roomNumber: string;
+  gsPs: string;
+  edd: string;
+  admissionStatus: string;
+  actions: string;
+}
 
 @Component({
-  selector: 'app-ob-patients',
-  styleUrls: ['./ob-patients.component.scss'],
-  templateUrl: './ob-patients.component.html'
+  selector: "app-ob-patients",
+  styleUrls: ["./ob-patients.component.scss"],
+  templateUrl: "./ob-patients.component.html",
 })
 export class ObPatientsComponent implements OnInit {
+  displayedColumns: string[] = [
+    "fullName",
+    "roomNumber",
+    "gsPs",
+    "edd",
+    "admissionStatus",
+    "actions"
+  ];
+  dataSource: MatTableDataSource<ObPatientsData>;
 
-  patientsList = [];
+  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
+  @ViewChild(MatSort, { static: false }) sort: MatSort;
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
+  }
+  openDialog() {
+    const dialogConfig = new MatDialogConfig();
+    this.dialog.open(DialogContentExampleDialog, dialogConfig);
+  }
+  obPatientsList = [];
+  gynPatientsList = [];
   tempPatientsList = [];
   constructor(
     private loginSer: HomeService,
     private appService: NotificationService,
-    private router: Router
-  ) { }
+    private router: Router,
+    public dialog: MatDialog
+  ) {
+
+    // // Assign the data to the data source for the table to render
+    // this.dataSource = new MatTableDataSource(this.patientsList);
+
+  }
 
   ngOnInit() {
     this.getPatients();
   }
 
   getPatients() {
-    this.patientsList = [];
+    this.obPatientsList = [];
     this.tempPatientsList = [];
     // this.appService.showLoader();
-    this.loginSer.fetchPatients(environment.api.obPatients, false).subscribe((data: any) => {
-      console.log(data.data);
-     // this.appService.hideLoader();
-      if (data._statusCode === '200') {
-        this.patientsList = data.data.patientDetails;
-        console.log(this.patientsList);
-        this.patientsList.forEach((item: any) => {
-          item.avatar = item.mstUsers.firstName.substring(0, 1);
-          item.color = this.appService.getRandomColor();
-        });
-        this.tempPatientsList = this.patientsList;
-      } else if (!data.status) {
-        this.goToLoginScreen();
-      } else {
-        this.appService.error('!Error', data.message);
-      }
-    });
+    this.loginSer
+      .fetchPatients(environment.api.showPatients, "census")
+      .subscribe((data: any) => {
+
+        // this.appService.hideLoader();
+        if (data._statusCode === "200") {
+          this.obPatientsList = data.data.obPatientsList;
+          this.gynPatientsList = data.data.gynPatientsList;
+          this.obPatientsList = data.data.obPatientsList.map(val=>({...val,fullName:`${val.mstUsers.firstName} ${val.mstUsers.lastName}`}));
+          this.dataSource = new MatTableDataSource(this.obPatientsList);
+          this.dataSource.paginator = this.paginator;
+          this.dataSource.sort = this.sort;
+          this.obPatientsList.forEach((item: any) => {
+            item.avatar = item.mstUsers.firstName.substring(0, 1);
+            item.color = this.appService.getRandomColor();
+          });
+          this.tempPatientsList = this.obPatientsList;
+        } else if (!data.status) {
+          this.goToLoginScreen();
+        } else {
+          this.appService.error("!Error", data.message);
+        }
+      });
   }
 
   bachAction() {
-    this.router.navigate(['/home']);
+    this.router.navigate(["/home"]);
   }
 
   searchHandler(event): void {
     const val = event.target.value;
-    if (val && val.trim() !== '') {
-      this.tempPatientsList = this.patientsList.filter((item: any) => {
-        return (item.mstUsers.firstName.toLowerCase().indexOf(val.toLowerCase()) > -1);
+    if (val && val.trim() !== "") {
+      this.tempPatientsList = this.obPatientsList.filter((item: any) => {
+        return (
+          item.mstUsers.firstName.toLowerCase().indexOf(val.toLowerCase()) > -1
+        );
       });
     } else {
-      this.tempPatientsList = this.patientsList;
+      this.tempPatientsList = this.obPatientsList;
     }
   }
 
   unAdmitPatient(item: any) {
     const userdata = {
-      token: localStorage.getItem('deviceToken'),
-      patientDetailsId: item.mstUsers.userId
+      token: localStorage.getItem("deviceToken"),
+      patientDetailsId: item.mstUsers.userId,
     };
-   // this.appService.showLoader();
+    // this.appService.showLoader();
     this.loginSer.fetchUnAdimtPatient(userdata).subscribe((data: any) => {
       console.log(data.data);
       //this.appService.hideLoader();
@@ -76,69 +127,72 @@ export class ObPatientsComponent implements OnInit {
       } else if (!data.status) {
         this.goToLoginScreen();
       } else {
-       // this.appService.hideLoader();
-        this.appService.alert('!Error', data.message);
+        // this.appService.hideLoader();
+        this.appService.alert("!Error", data.message);
       }
     });
   }
 
   DischargePatient(item: any) {
     const userdata = {
-      token: localStorage.getItem('deviceToken'),
-      patientDetailsId: item.mstUsers.userId
+      token: localStorage.getItem("deviceToken"),
+      patientDetailsId: item.mstUsers.userId,
     };
     //this.appService.showLoader();
     this.loginSer.fetchDischargePatient(userdata).subscribe((data: any) => {
       console.log(data.data);
-     // this.appService.hideLoader();
+      // this.appService.hideLoader();
       if (data.status) {
         this.getPatients();
       } else if (!data.status) {
         this.goToLoginScreen();
       } else {
-      //  this.appService.hideLoader();
-        this.appService.alert('!Error', data.message);
+        //  this.appService.hideLoader();
+        this.appService.alert("!Error", data.message);
       }
     });
   }
 
-  viewPatientDetails() {
-
-  }
+  viewPatientDetails() {}
 
   gotoDashboardPage() {
-    this.router.navigateByUrl('/home');
+    this.router.navigateByUrl("/home");
   }
 
   patientsTypeSelection() {
-    this.router.navigateByUrl('/ob-patients');
+    this.router.navigateByUrl("/ob-patients");
   }
 
   goToAddPatient() {
     const navigationExtras: NavigationExtras = {
       state: {
-        patientType: 'add',
-        patientDetails: ''
-      }
+        patientType: "add",
+        patientDetails: "",
+      },
     };
-    this.router.navigate(['addobpatient'], navigationExtras);
+    this.router.navigate(["addobpatient"], navigationExtras);
   }
 
   goToUpdatePatient(item: any) {
     console.log(item);
     const navigationExtras: NavigationExtras = {
       state: {
-        patientType: 'update',
-        patientDetails: item
-      }
+        patientType: "update",
+        patientDetails: item,
+      },
     };
-    this.router.navigate(['addobpatient'], navigationExtras);
+    this.router.navigate(["addobpatient"], navigationExtras);
   }
 
   goToLoginScreen() {
-    localStorage.setItem('deviceToken', '');
-    localStorage.setItem('userData', '');
-    localStorage.setItem('deviceId', '');
-    this.router.navigateByUrl('/login');
+    localStorage.setItem("deviceToken", "");
+    localStorage.setItem("userData", "");
+    localStorage.setItem("deviceId", "");
+    this.router.navigateByUrl("/login");
   }
 }
+@Component({
+  selector: "dialog-content-example-dialog",
+  templateUrl: "dialog-content-example-dialog.html",
+})
+export class DialogContentExampleDialog {}

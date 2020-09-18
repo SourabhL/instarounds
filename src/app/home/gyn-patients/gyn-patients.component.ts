@@ -1,9 +1,20 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit,Input, ViewChild, EventEmitter,Output} from '@angular/core';
 import {HomeService} from '../../services/home.service';
 import {NotificationService} from '../../notification/notification.service';
 import {NavigationExtras, Router} from '@angular/router';
+import { MatPaginator } from "@angular/material/paginator";
+import { MatSort } from "@angular/material/sort";
+import { MatTableDataSource } from "@angular/material/table";
 import {environment} from '../../../environments/environment';
+import { DataSource } from '@angular/cdk/table';
+import { validate } from 'json-schema';
 
+export interface GynPatientsData {
+  fullName: string;
+  roomNumber: string;
+  admissionStatus: string;
+  actions: string;
+}
 
 @Component({
   selector: 'app-gyn-patients',
@@ -11,55 +22,61 @@ import {environment} from '../../../environments/environment';
   templateUrl: './gyn-patients.component.html'
 })
 export class GynPatientsComponent implements OnInit {
+  @Input() gynPatientsList: [];
+  @Output() openDialog = new EventEmitter();
 
-  patientsList = [];
   tempPatientsList = [];
+  newGynPatientsList=[];
+  displayedColumns: string[] = [
+    "fullName",
+    "roomNumber",
+    "admissionStatus",
+    "actions"
+  ];
+  dataSource: MatTableDataSource<GynPatientsData>;
 
   constructor(
     private loginSer: HomeService,
     private appService: NotificationService,
     private router: Router
   ) {
+    //console.log(this.Message);
   }
+  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
+  @ViewChild(MatSort, { static: true }) sort: MatSort;
 
   ngOnInit() {
-    this.getPatients();
-  }
-  getPatients() {
-    this.patientsList = [];
-    this.tempPatientsList = [];
-    // this.appService.showLoader();
-    this.loginSer.fetchPatients(environment.api.gynPatients, false).subscribe((data: any) => {
-
-      // this.appService.hideLoader();
-      if (data._statusCode === '200') {
-        this.patientsList = data.data.patientDetails;
-        console.log(this.patientsList);
-        this.patientsList.forEach((item: any) => {
-          item.avatar = item.mstUsers.firstName.substring(0, 1);
-          item.color = this.appService.getRandomColor();
-        });
-        this.tempPatientsList = this.patientsList;
-      } else if (!data.status) {
-        this.goToLoginScreen();
-      } else {
-        this.appService.error('!Error', data.message);
-      }
-    });
+   this.newGynPatientsList = this.gynPatientsList;
+   this.newGynPatientsList = this.newGynPatientsList.map(val=>({...val,fullName:`${val.mstUsers.firstName} ${val.mstUsers.lastName}`}));
+   this.dataSource = new MatTableDataSource(this.newGynPatientsList);
+   this.tempPatientsList = this.gynPatientsList;
+   this.dataSource.paginator = this.paginator;
+   this.dataSource.sort = this.sort;
+   console.log(this.dataSource);
   }
 
   bachAction() {
     this.router.navigate(['/home']);
   }
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
+  }
 
+  openNewDialog(){
+    this.openDialog.emit();
+  }
   searchHandler(event): void {
     const val = event.target.value;
     if (val && val.trim() !== '') {
-      this.tempPatientsList = this.patientsList.filter((item: any) => {
+      this.tempPatientsList = this.gynPatientsList.filter((item: any) => {
         return (item.mstUsers.firstName.toLowerCase().indexOf(val.toLowerCase()) > -1);
       });
     } else {
-      this.tempPatientsList = this.patientsList;
+      this.tempPatientsList = this.gynPatientsList;
     }
   }
 
@@ -73,7 +90,7 @@ export class GynPatientsComponent implements OnInit {
       console.log(data.data);
       //  this.appService.hideLoader();
       if (data.status) {
-        this.getPatients();
+        //this.getPatients();
       } else if (!data.status) {
         this.goToLoginScreen();
       } else {
@@ -93,7 +110,7 @@ export class GynPatientsComponent implements OnInit {
       console.log(data.data);
       // this.appService.hideLoader();
       if (data.status) {
-        this.getPatients();
+       // this.getPatients();
       } else if (!data.status) {
         this.goToLoginScreen();
       } else {

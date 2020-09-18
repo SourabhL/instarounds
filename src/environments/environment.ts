@@ -12,6 +12,7 @@ export const environment = {
     login: 'login/checkLogin?',
     patientCount: 'patient/getPatCount?',
     obPatients: 'patient/obpatients?',
+    showPatients: 'patient/showPatients?',
     gynPatients: 'patient/gynpatients?',
     getHospitals: 'provider/gethospitals?',
     getProcedures: 'provider/getprocedures?',
