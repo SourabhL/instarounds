@@ -1,4 +1,4 @@
-import {Component, OnInit,Input, ViewChild} from '@angular/core';
+import {Component, OnInit,Input, ViewChild, EventEmitter,Output} from '@angular/core';
 import {HomeService} from '../../services/home.service';
 import {NotificationService} from '../../notification/notification.service';
 import {NavigationExtras, Router} from '@angular/router';
@@ -7,9 +7,10 @@ import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
 import {environment} from '../../../environments/environment';
 import { DataSource } from '@angular/cdk/table';
+import { validate } from 'json-schema';
 
 export interface GynPatientsData {
-  name: string;
+  fullName: string;
   roomNumber: string;
   admissionStatus: string;
   actions: string;
@@ -22,9 +23,12 @@ export interface GynPatientsData {
 })
 export class GynPatientsComponent implements OnInit {
   @Input() gynPatientsList: [];
+  @Output() openDialog = new EventEmitter();
+
   tempPatientsList = [];
+  newGynPatientsList=[];
   displayedColumns: string[] = [
-    "name",
+    "fullName",
     "roomNumber",
     "admissionStatus",
     "actions"
@@ -39,13 +43,16 @@ export class GynPatientsComponent implements OnInit {
     //console.log(this.Message);
   }
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
-  @ViewChild(MatSort, { static: false }) sort: MatSort;
+  @ViewChild(MatSort, { static: true }) sort: MatSort;
 
   ngOnInit() {
-   this.dataSource = new MatTableDataSource(this.gynPatientsList);
+   this.newGynPatientsList = this.gynPatientsList;
+   this.newGynPatientsList = this.newGynPatientsList.map(val=>({...val,fullName:`${val.mstUsers.firstName} ${val.mstUsers.lastName}`}));
+   this.dataSource = new MatTableDataSource(this.newGynPatientsList);
    this.tempPatientsList = this.gynPatientsList;
    this.dataSource.paginator = this.paginator;
    this.dataSource.sort = this.sort;
+   console.log(this.dataSource);
   }
 
   bachAction() {
@@ -54,10 +61,13 @@ export class GynPatientsComponent implements OnInit {
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
-
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
     }
+  }
+
+  openNewDialog(){
+    this.openDialog.emit();
   }
   searchHandler(event): void {
     const val = event.target.value;
