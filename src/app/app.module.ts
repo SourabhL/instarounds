@@ -24,6 +24,7 @@ import {
   ObPatientsComponent,
   DialogContentExampleDialog,
 } from "./home/ob-patients/ob-patients.component";
+import { OutPatientsComponent } from "./home/out-patients/out-patients.component";
 import { SchedulerComponent } from "./home/scheduler/scheduler.component";
 import { SettingsComponent } from "./home/settings/settings.component";
 import { UserInfoComponent } from "./home/user-info/user-info.component";
@@ -48,6 +49,7 @@ import { MatDialogModule } from "@angular/material";
     AddschedulerappointmentComponent,
     GynPatientsComponent,
     ObPatientsComponent,
+    OutPatientsComponent,
     SchedulerComponent,
     SettingsComponent,
     UserInfoComponent,

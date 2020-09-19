@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, Inject, OnInit, ViewChild } from "@angular/core";
 import { HomeService } from "../../services/home.service";
 import { NotificationService } from "../../notification/notification.service";
 import { NavigationExtras, Router } from "@angular/router";
@@ -6,7 +6,7 @@ import { environment } from "../../../environments/environment";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
-import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
+import { MatDialog, MAT_DIALOG_DATA } from "@angular/material/dialog";
 
 export interface ObPatientsData {
   fullName: string;
@@ -16,7 +16,7 @@ export interface ObPatientsData {
   admissionStatus: string;
   actions: string;
 }
-
+declare var moment: any;
 @Component({
   selector: "app-ob-patients",
   styleUrls: ["./ob-patients.component.scss"],
@@ -29,7 +29,7 @@ export class ObPatientsComponent implements OnInit {
     "gsPs",
     "edd",
     "admissionStatus",
-    "actions"
+    "actions",
   ];
   dataSource: MatTableDataSource<ObPatientsData>;
 
@@ -44,9 +44,13 @@ export class ObPatientsComponent implements OnInit {
       this.dataSource.paginator.firstPage();
     }
   }
-  openDialog() {
-    const dialogConfig = new MatDialogConfig();
-    this.dialog.open(DialogContentExampleDialog, dialogConfig);
+  openDialog(patientRow) {
+    console.log(patientRow);
+    this.dialog.open(DialogContentExampleDialog, {
+      data: {
+        ...patientRow,
+      },
+    });
   }
   obPatientsList = [];
   gynPatientsList = [];
@@ -57,10 +61,8 @@ export class ObPatientsComponent implements OnInit {
     private router: Router,
     public dialog: MatDialog
   ) {
-
     // // Assign the data to the data source for the table to render
     // this.dataSource = new MatTableDataSource(this.patientsList);
-
   }
 
   ngOnInit() {
@@ -74,15 +76,19 @@ export class ObPatientsComponent implements OnInit {
     this.loginSer
       .fetchPatients(environment.api.showPatients, "census")
       .subscribe((data: any) => {
-
         // this.appService.hideLoader();
         if (data._statusCode === "200") {
           this.obPatientsList = data.data.obPatientsList;
           this.gynPatientsList = data.data.gynPatientsList;
-          this.obPatientsList = data.data.obPatientsList.map(val=>({...val,fullName:`${val.mstUsers.firstName} ${val.mstUsers.lastName}`}));
+          this.obPatientsList = data.data.obPatientsList.map((val) => ({
+            ...val,
+            fullName: `${val.mstUsers.firstName} ${val.mstUsers.lastName}`,
+            edd: (val.edd && moment(val.edd).format("YYYY-MM-DD")) || val.edd,
+          }));
           this.dataSource = new MatTableDataSource(this.obPatientsList);
           this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
+
           this.obPatientsList.forEach((item: any) => {
             item.avatar = item.mstUsers.firstName.substring(0, 1);
             item.color = this.appService.getRandomColor();
@@ -133,26 +139,6 @@ export class ObPatientsComponent implements OnInit {
     });
   }
 
-  DischargePatient(item: any) {
-    const userdata = {
-      token: localStorage.getItem("deviceToken"),
-      patientDetailsId: item.mstUsers.userId,
-    };
-    //this.appService.showLoader();
-    this.loginSer.fetchDischargePatient(userdata).subscribe((data: any) => {
-      console.log(data.data);
-      // this.appService.hideLoader();
-      if (data.status) {
-        this.getPatients();
-      } else if (!data.status) {
-        this.goToLoginScreen();
-      } else {
-        //  this.appService.hideLoader();
-        this.appService.alert("!Error", data.message);
-      }
-    });
-  }
-
   viewPatientDetails() {}
 
   gotoDashboardPage() {
@@ -162,7 +148,9 @@ export class ObPatientsComponent implements OnInit {
   patientsTypeSelection() {
     this.router.navigateByUrl("/ob-patients");
   }
-
+  goToOutPatient() {
+    this.router.navigateByUrl("/out-patients");
+  }
   goToAddPatient() {
     const navigationExtras: NavigationExtras = {
       state: {
@@ -195,4 +183,30 @@ export class ObPatientsComponent implements OnInit {
   selector: "dialog-content-example-dialog",
   templateUrl: "dialog-content-example-dialog.html",
 })
-export class DialogContentExampleDialog {}
+export class DialogContentExampleDialog {
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: ObPatientsData,
+    private loginSer: HomeService,
+    private appService: NotificationService
+  ) {}
+  DischargePatient(item: any) {
+    console.log(item);
+    const userdata = {
+      token: localStorage.getItem("deviceToken"),
+      patientDetailsId: item.mstUsers.userId,
+    };
+    // this.appService.showLoader();
+    this.loginSer.fetchDischargePatient(userdata).subscribe((data: any) => {
+      console.log(data.data);
+      // this.appService.hideLoader();
+      // if (data.status) {
+      //   this.getPatients();
+      // } else if (!data.status) {
+      //   this.goToLoginScreen();
+      // } else {
+      //   //  this.appService.hideLoader();
+      //   this.appService.alert("!Error", data.message);
+      // }
+    });
+  }
+}

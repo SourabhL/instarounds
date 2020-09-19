@@ -30,7 +30,7 @@
 </section>
 <section class="row ob-patients-block mx-0 px-5">
   <div class="row col-md-12 mx-0 p0 mt-2">
-    <div class="offset-md-7 col-md-5 col-sm-12 col-xs-12 p0">
+    <div class="offset-md-5 col-md-7 col-sm-12 col-xs-12 p0">
       <ul class="custom-breadcrumb pull-right">
         <li class="ml-2">
           <button type="button" class="btn btn-info" (click)="goToAddPatient()">
@@ -41,25 +41,17 @@
           <button
             type="button"
             class="btn btn-success"
-            (click)="goToAddPatient()"
+            (click)="patientsTypeSelection()"
           >
             Census
           </button>
         </li>
-        <li class="ml-2">
-          <button
-            type="button"
-            class="btn btn-warning"
-            (click)="goToAddPatient()"
-          >
-            IN Patients
-          </button>
-        </li>
+
         <li class="ml-2 pull-right">
           <button
             type="button"
             class="btn btn-secondary"
-            (click)="goToAddPatient()"
+            (click)="goToOutPatient()"
           >
             Discharged
           </button>
@@ -72,7 +64,7 @@
       <div class="card-header text-white bg-info">
         <h5><i class="fa fa-calendar" aria-hidden="true"></i> OB</h5>
       </div>
-      <div class="card-body">
+      <div class="card-body no-table-padding">
         <div class="pull-right">
           <mat-form-field>
             <mat-label>Search</mat-label>
@@ -86,24 +78,20 @@
         </div>
       </div>
       <table mat-table [dataSource]="dataSource" matSort>
-
         <ng-container matColumnDef="fullName">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
           <td mat-cell *matCellDef="let row">{{ row.fullName }}</td>
         </ng-container>
-
 
         <ng-container matColumnDef="roomNumber">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Room Number</th>
           <td mat-cell *matCellDef="let row">{{ row.roomNumber }}</td>
         </ng-container>
 
-
         <ng-container matColumnDef="gsPs">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>G's & P's</th>
           <td mat-cell *matCellDef="let row">{{ row.gsPs }}</td>
         </ng-container>
-
 
         <ng-container matColumnDef="edd">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>EDD</th>
@@ -117,14 +105,14 @@
             Admission Status
           </th>
           <td mat-cell *matCellDef="let row">
-              <a [routerLink]="" (click)="openDialog()">
-                {{ row.admissionStatus }}
-              </a>
+            <a [routerLink]="" (click)="openDialog(row)">
+              {{ row.admissionStatus }}
+            </a>
           </td>
         </ng-container>
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let row" >
+          <td mat-cell *matCellDef="let row">
             <a routerLink="/your-link"> view/edit</a>
           </td>
         </ng-container>
@@ -143,6 +131,10 @@
     </div>
   </div>
   <div *ngIf="gynPatientsList.length" class="row col-md-12 mx-0 p0 mt-4 mb-5">
-    <app-gyn-patients [gynPatientsList]="gynPatientsList" (openDialog)="openDialog()" class="row col-md-12 mx-0 p0"></app-gyn-patients>
+    <app-gyn-patients
+      [gynPatientsList]="gynPatientsList"
+      (openDialog)="openDialog()"
+      class="row col-md-12 mx-0 p0"
+    ></app-gyn-patients>
   </div>
 </section>
