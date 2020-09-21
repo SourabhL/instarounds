@@ -1,6 +1,6 @@
-<h2 mat-dialog-title>Discharge Patient</h2>
+<h2 mat-dialog-title>Re-Admit Patient</h2>
 <mat-dialog-content class="mat-typography">
-  <h5>Are you sure you want to discharge the patient "{{data.fullName}}"?</h5>
+  <h5>Are you sure you want to re-admit the patient "{{data.fullName}}"?</h5>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button mat-dialog-close>No</button>
@@ -9,7 +9,6 @@
     mat-button
     [mat-dialog-close]="true"
     cdkFocusInitial
-    (click)="DischargePatient(data)"
   >
     Yes
   </button>

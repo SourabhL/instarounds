@@ -8,7 +8,8 @@ import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
 import { MatDialog, MAT_DIALOG_DATA } from "@angular/material/dialog";
 
-export interface ObPatientsData {
+declare var moment: any;
+export interface OutPatientsData {
   fullName: string;
   roomNumber: string;
   gsPs: string;
@@ -16,13 +17,13 @@ export interface ObPatientsData {
   admissionStatus: string;
   actions: string;
 }
-declare var moment: any;
+
 @Component({
-  selector: "app-ob-patients",
-  styleUrls: ["./ob-patients.component.scss"],
-  templateUrl: "./ob-patients.component.html",
+  selector: "app-out-patients",
+  styleUrls: ["./out-patients.component.scss"],
+  templateUrl: "./out-patients.component.html",
 })
-export class ObPatientsComponent implements OnInit {
+export class OutPatientsComponent implements OnInit {
   displayedColumns: string[] = [
     "fullName",
     "roomNumber",
@@ -31,7 +32,7 @@ export class ObPatientsComponent implements OnInit {
     "admissionStatus",
     "actions",
   ];
-  dataSource: MatTableDataSource<ObPatientsData>;
+  dataSource: MatTableDataSource<OutPatientsData>;
 
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: false }) sort: MatSort;
@@ -46,7 +47,7 @@ export class ObPatientsComponent implements OnInit {
   }
   openDialog(patientRow) {
     console.log(patientRow);
-    this.dialog.open(DialogContentExampleDialog, {
+    this.dialog.open(DialogContentOutDialog, {
       data: {
         ...patientRow,
       },
@@ -68,27 +69,47 @@ export class ObPatientsComponent implements OnInit {
   ngOnInit() {
     this.getPatients();
   }
-
+  goToOutPatient() {
+    this.router.navigateByUrl("/out-patients");
+  }
   getPatients() {
     this.obPatientsList = [];
     this.tempPatientsList = [];
     // this.appService.showLoader();
     this.loginSer
-      .fetchPatients(environment.api.showPatients, "census")
+      .fetchOutPatients(environment.api.getOutPatients)
       .subscribe((data: any) => {
         // this.appService.hideLoader();
         if (data._statusCode === "200") {
-          this.obPatientsList = data.data.obPatientsList;
-          this.gynPatientsList = data.data.gynPatientsList;
-          this.obPatientsList = data.data.obPatientsList.map((val) => ({
-            ...val,
-            fullName: `${val.mstUsers.firstName} ${val.mstUsers.lastName}`,
-            edd: (val.edd && moment(val.edd).format("MM/DD/YYYY")) || val.edd,
-          }));
+          console.log("data.data.patientsList...", data.data);
+          this.obPatientsList = data.data.patientDetails
+            .filter((val) => val.patientTypes.type == "OB")
+            .map((val) => ({
+              ...val,
+              fullName: `${val.mstUsers.firstName} ${val.mstUsers.lastName}`,
+              edd: (val.edd && moment(val.edd).format("MM/DD/YYYY")) || val.edd,
+              dischargeDate:
+                (val.dischargeDate &&
+                  moment(val.dischargeDate).format("MM/DD/YYYY")) ||
+                val.edd,
+            }));
+
+          this.gynPatientsList = data.data.patientDetails
+            .filter((val) => val.patientTypes.type == "GYN")
+            .map((val) => ({
+              ...val,
+              fullName: `${val.mstUsers.firstName} ${val.mstUsers.lastName}`,
+            }));
+          console.log("this.obPatientsList...", this.obPatientsList);
+          // this.obPatientsList = data.data.patientDetails;
+          // this.gynPatientsList = data.data.gynPatientsList;
+          // this.obPatientsList = data.data.obPatientsList.map((val) => ({
+          //   ...val,
+          //   fullName: `${val.mstUsers.firstName} ${val.mstUsers.lastName}`,
+          // }));
           this.dataSource = new MatTableDataSource(this.obPatientsList);
           this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
-
           this.obPatientsList.forEach((item: any) => {
             item.avatar = item.mstUsers.firstName.substring(0, 1);
             item.color = this.appService.getRandomColor();
@@ -139,6 +160,26 @@ export class ObPatientsComponent implements OnInit {
     });
   }
 
+  DischargePatient(item: any) {
+    const userdata = {
+      token: localStorage.getItem("deviceToken"),
+      patientDetailsId: item.mstUsers.userId,
+    };
+    //this.appService.showLoader();
+    this.loginSer.fetchDischargePatient(userdata).subscribe((data: any) => {
+      console.log(data.data);
+      // this.appService.hideLoader();
+      if (data.status) {
+        this.getPatients();
+      } else if (!data.status) {
+        this.goToLoginScreen();
+      } else {
+        //  this.appService.hideLoader();
+        this.appService.alert("!Error", data.message);
+      }
+    });
+  }
+
   viewPatientDetails() {}
 
   gotoDashboardPage() {
@@ -148,9 +189,7 @@ export class ObPatientsComponent implements OnInit {
   patientsTypeSelection() {
     this.router.navigateByUrl("/ob-patients");
   }
-  goToOutPatient() {
-    this.router.navigateByUrl("/out-patients");
-  }
+
   goToAddPatient() {
     const navigationExtras: NavigationExtras = {
       state: {
@@ -180,12 +219,12 @@ export class ObPatientsComponent implements OnInit {
   }
 }
 @Component({
-  selector: "dialog-content-example-dialog",
-  templateUrl: "dialog-content-example-dialog.html",
+  selector: "dialog-content-out-dialog",
+  templateUrl: "dialog-content-out-dialog.html",
 })
-export class DialogContentExampleDialog {
+export class DialogContentOutDialog {
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: ObPatientsData,
+    @Inject(MAT_DIALOG_DATA) public data: OutPatientsData,
     private loginSer: HomeService,
     private appService: NotificationService
   ) {}
@@ -196,7 +235,7 @@ export class DialogContentExampleDialog {
       patientDetailsId: item.mstUsers.userId,
     };
     // this.appService.showLoader();
-    this.loginSer.fetchDischargePatient(userdata).subscribe((data: any) => {
+    this.loginSer.fetchReAdmitPatient(userdata).subscribe((data: any) => {
       console.log(data.data);
       // this.appService.hideLoader();
       // if (data.status) {

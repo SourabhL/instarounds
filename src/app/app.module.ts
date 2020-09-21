@@ -24,7 +24,10 @@ import {
   ObPatientsComponent,
   DialogContentExampleDialog,
 } from "./home/ob-patients/ob-patients.component";
-import { OutPatientsComponent } from "./home/out-patients/out-patients.component";
+import {
+  OutPatientsComponent,
+  DialogContentOutDialog,
+} from "./home/out-patients/out-patients.component";
 import { SchedulerComponent } from "./home/scheduler/scheduler.component";
 import { SettingsComponent } from "./home/settings/settings.component";
 import { UserInfoComponent } from "./home/user-info/user-info.component";
@@ -57,6 +60,7 @@ import { MatDialogModule } from "@angular/material";
     ForgotPasswordComponent,
     NotificationListComponent,
     DialogContentExampleDialog,
+    DialogContentOutDialog,
   ],
   imports: [
     BrowserModule,
@@ -73,7 +77,11 @@ import { MatDialogModule } from "@angular/material";
     MatSortModule,
     MatDialogModule,
   ],
-  entryComponents: [AppComponent, DialogContentExampleDialog],
+  entryComponents: [
+    AppComponent,
+    DialogContentExampleDialog,
+    DialogContentOutDialog,
+  ],
   providers: [CsvDataService, NotificationService],
   bootstrap: [AppComponent],
 })
