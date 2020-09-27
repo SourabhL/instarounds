@@ -66,7 +66,7 @@ export class HomeService {
 
   fetchReAdmitPatient(userData: any) {
     return this.http.put(
-      `${environment.api.baseUrl}patient/reAdmitPatient}`,
+      `${environment.api.baseUrl}patient/reAdmitPatient`,
       userData
     );
   }

@@ -1,4 +1,11 @@
-import { Component, Inject, OnInit, ViewChild } from "@angular/core";
+import {
+  Component,
+  Inject,
+  OnInit,
+  ViewChild,
+  EventEmitter,
+  Output,
+} from "@angular/core";
 import { HomeService } from "../../services/home.service";
 import { NotificationService } from "../../notification/notification.service";
 import { NavigationExtras, Router } from "@angular/router";
@@ -6,7 +13,12 @@ import { environment } from "../../../environments/environment";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
-import { MatDialog, MAT_DIALOG_DATA } from "@angular/material/dialog";
+import {
+  MatDialog,
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+  MatDialogConfig,
+} from "@angular/material/dialog";
 
 declare var moment: any;
 export interface OutPatientsData {
@@ -46,11 +58,21 @@ export class OutPatientsComponent implements OnInit {
     }
   }
   openDialog(patientRow) {
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.disableClose = true;
+    dialogConfig.autoFocus = true;
+
+    dialogConfig.data = {
+      ...patientRow,
+    };
+
     console.log(patientRow);
-    this.dialog.open(DialogContentOutDialog, {
-      data: {
-        ...patientRow,
-      },
+    const dialogRef = this.dialog.open(DialogContentOutDialog, dialogConfig);
+    dialogRef.afterClosed().subscribe((data) => {
+      console.log("Dialog output:", data);
+      if (data.id) {
+        this.reAdmitPatient(data);
+      }
     });
   }
   obPatientsList = [];
@@ -75,10 +97,12 @@ export class OutPatientsComponent implements OnInit {
   getPatients() {
     this.obPatientsList = [];
     this.tempPatientsList = [];
+
     // this.appService.showLoader();
     this.loginSer
       .fetchOutPatients(environment.api.getOutPatients)
       .subscribe((data: any) => {
+        console.log(data);
         // this.appService.hideLoader();
         if (data._statusCode === "200") {
           console.log("data.data.patientsList...", data.data);
@@ -116,6 +140,7 @@ export class OutPatientsComponent implements OnInit {
           });
           this.tempPatientsList = this.obPatientsList;
         } else if (!data.status) {
+          console.log("go to login screen");
           this.goToLoginScreen();
         } else {
           this.appService.error("!Error", data.message);
@@ -217,18 +242,8 @@ export class OutPatientsComponent implements OnInit {
     localStorage.setItem("deviceId", "");
     this.router.navigateByUrl("/login");
   }
-}
-@Component({
-  selector: "dialog-content-out-dialog",
-  templateUrl: "dialog-content-out-dialog.html",
-})
-export class DialogContentOutDialog {
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: OutPatientsData,
-    private loginSer: HomeService,
-    private appService: NotificationService
-  ) {}
-  DischargePatient(item: any) {
+  reAdmitPatient(item: any) {
+    console.log("Inside Parent reAdmitPatient");
     console.log(item);
     const userdata = {
       token: localStorage.getItem("deviceToken"),
@@ -237,6 +252,7 @@ export class DialogContentOutDialog {
     // this.appService.showLoader();
     this.loginSer.fetchReAdmitPatient(userdata).subscribe((data: any) => {
       console.log(data.data);
+      this.getPatients();
       // this.appService.hideLoader();
       // if (data.status) {
       //   this.getPatients();
@@ -247,5 +263,23 @@ export class DialogContentOutDialog {
       //   this.appService.alert("!Error", data.message);
       // }
     });
+  }
+}
+@Component({
+  selector: "dialog-content-out-dialog",
+  templateUrl: "dialog-content-out-dialog.html",
+})
+export class DialogContentOutDialog {
+  constructor(
+    private dialogRef: MatDialogRef<DialogContentOutDialog>,
+    @Inject(MAT_DIALOG_DATA) public data: OutPatientsData
+  ) {}
+
+  confirmReAdmit(item) {
+    console.log(item);
+    this.dialogRef.close(item);
+  }
+  closeReAdmitDialog() {
+    this.dialogRef.close();
   }
 }

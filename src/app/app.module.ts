@@ -14,7 +14,18 @@ import { CsvDataService } from "./home/anlytiks/csv-data.service";
 import { MatDatepickerModule } from "@angular/material/datepicker";
 import { SatDatepickerModule } from "saturn-datepicker";
 import { ChartsViewComponent } from "./home/charts-view/charts-view.component";
-import { MatGridListModule, MatNativeDateModule } from "@angular/material";
+import {
+  MatGridListModule,
+  MatNativeDateModule,
+  MatSelectModule,
+  MatPaginatorModule,
+  MatSortModule,
+  MatDialogModule,
+  MatTooltipModule,
+  MatCheckboxModule,
+  MatRadioModule,
+} from "@angular/material";
+
 import { AboutComponent } from "./about/about.component";
 import { AddgynpatientsComponent } from "./home/addgynpatients/addgynpatients.component";
 import { AddobpatientComponent } from "./home/addobpatient/addobpatient.component";
@@ -35,9 +46,6 @@ import { UserListComponent } from "./home/user-list/user-list.component";
 import { ForgotPasswordComponent } from "./forgot-password/forgot-password.component";
 import { NotificationListComponent } from "./notification/notification.component";
 import { NotificationService } from "./notification/notification.service";
-import { MatPaginatorModule } from "@angular/material";
-import { MatSortModule } from "@angular/material";
-import { MatDialogModule } from "@angular/material";
 
 @NgModule({
   declarations: [
@@ -72,10 +80,14 @@ import { MatDialogModule } from "@angular/material";
     MatDatepickerModule,
     SatDatepickerModule,
     MatNativeDateModule,
+    MatSelectModule,
     MatGridListModule,
     MatPaginatorModule,
     MatSortModule,
     MatDialogModule,
+    MatTooltipModule,
+    MatCheckboxModule,
+    MatRadioModule,
   ],
   entryComponents: [
     AppComponent,

@@ -1,0 +1,37 @@
+@import "../home.component";
+
+.no-table-padding {
+  padding: 0 1.25rem;
+}
+.example-full-width {
+  width: 100%;
+}
+.mat-form-field-type-mat-select .mat-form-field-label,
+.mat-select-value {
+  color: red;
+}
+.hintFont {
+  font-size: 14px !important;
+}
+.gtpal_width {
+  width: 18%;
+  margin-right: 2%;
+}
+.actionButtonsWrapper {
+  display: flex;
+  justify-content: flex-end;
+}
+.actionButtons {
+  margin-left: 2%;
+}
+.gsps_weeks_days {
+  width: 45%;
+  margin-right: 2%;
+}
+
+.example-margin {
+  margin: 0 10px;
+}
+.mat-radio-button ~ .mat-radio-button {
+  margin-left: 16px;
+}

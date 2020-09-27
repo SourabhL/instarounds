@@ -6,7 +6,12 @@ import { environment } from "../../../environments/environment";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
-import { MatDialog, MAT_DIALOG_DATA } from "@angular/material/dialog";
+import {
+  MatDialog,
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+  MatDialogConfig,
+} from "@angular/material/dialog";
 
 export interface ObPatientsData {
   fullName: string;
@@ -45,11 +50,24 @@ export class ObPatientsComponent implements OnInit {
     }
   }
   openDialog(patientRow) {
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.disableClose = true;
+    dialogConfig.autoFocus = true;
+
+    dialogConfig.data = {
+      ...patientRow,
+    };
     console.log(patientRow);
-    this.dialog.open(DialogContentExampleDialog, {
-      data: {
-        ...patientRow,
-      },
+    const dialogRef = this.dialog.open(
+      DialogContentExampleDialog,
+      dialogConfig
+    );
+
+    dialogRef.afterClosed().subscribe((data) => {
+      console.log("Dialog output:", data);
+      if (data.id) {
+        this.DischargePatient(data);
+      }
     });
   }
   obPatientsList = [];
@@ -70,6 +88,7 @@ export class ObPatientsComponent implements OnInit {
   }
 
   getPatients() {
+    console.log("Into get patients");
     this.obPatientsList = [];
     this.tempPatientsList = [];
     // this.appService.showLoader();
@@ -160,6 +179,9 @@ export class ObPatientsComponent implements OnInit {
     };
     this.router.navigate(["addobpatient"], navigationExtras);
   }
+  goToAnlyticsPage() {
+    this.router.navigateByUrl("/anlytics");
+  }
 
   goToUpdatePatient(item: any) {
     console.log(item);
@@ -178,27 +200,19 @@ export class ObPatientsComponent implements OnInit {
     localStorage.setItem("deviceId", "");
     this.router.navigateByUrl("/login");
   }
-}
-@Component({
-  selector: "dialog-content-example-dialog",
-  templateUrl: "dialog-content-example-dialog.html",
-})
-export class DialogContentExampleDialog {
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: ObPatientsData,
-    private loginSer: HomeService,
-    private appService: NotificationService
-  ) {}
+
   DischargePatient(item: any) {
     console.log(item);
     const userdata = {
       token: localStorage.getItem("deviceToken"),
       patientDetailsId: item.mstUsers.userId,
     };
-    // this.appService.showLoader();
+    //this.appService.showLoader();
     this.loginSer.fetchDischargePatient(userdata).subscribe((data: any) => {
       console.log(data.data);
-      // this.appService.hideLoader();
+      //this.appService.hideLoader();
+      this.getPatients();
+
       // if (data.status) {
       //   this.getPatients();
       // } else if (!data.status) {
@@ -208,5 +222,23 @@ export class DialogContentExampleDialog {
       //   this.appService.alert("!Error", data.message);
       // }
     });
+  }
+}
+@Component({
+  selector: "dialog-content-example-dialog",
+  templateUrl: "dialog-content-example-dialog.html",
+})
+export class DialogContentExampleDialog {
+  constructor(
+    private dialogRef: MatDialogRef<DialogContentExampleDialog>,
+    @Inject(MAT_DIALOG_DATA) public data: ObPatientsData
+  ) {}
+
+  confirmDischarge(item) {
+    console.log(item);
+    this.dialogRef.close(item);
+  }
+  closeDischargeDialog() {
+    this.dialogRef.close();
   }
 }
