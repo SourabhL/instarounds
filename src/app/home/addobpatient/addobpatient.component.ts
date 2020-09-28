@@ -42,6 +42,8 @@ export class AddobpatientComponent {
   patientType: any;
   patientAddType = "OB";
   gsList = [];
+  physiciansList=["Prac User 1","Prac User 2"];
+  physicianName="";
 
   minDate: any;
   maxDate: any;
@@ -87,8 +89,8 @@ export class AddobpatientComponent {
   gsWeeksList = [];
   cSectionReason = "";
   gsDaysList = [];
-  gsDays = "";
-  gsWeeks = "";
+  gsDays :any;
+  gsWeeks :any;
   gsdays = "";
   gspsg = "";
   gspst = "";
@@ -106,7 +108,7 @@ export class AddobpatientComponent {
     private router: Router,
     private route: ActivatedRoute // private pickerController: PickerController
   ) {
-    console.log("Inside Constructor", this.patientDetails);
+    this.patientType="add";
     this.getWeeksAndDaya();
     this.babyExpanded = false;
     this.bbayArrowicon = "arrow-dropright-circle";
@@ -152,7 +154,7 @@ export class AddobpatientComponent {
         patientDetails: "",
       },
     };
-    this.router.navigate(["addobpatient"], navigationExtras);
+    this.router.navigateByUrl("/addobpatient", navigationExtras);
   }
   goToAnlyticsPage() {
     this.router.navigateByUrl("/anlytics");
@@ -509,20 +511,15 @@ export class AddobpatientComponent {
     const oDate = moment(event.target.value);
     const diffDays = todaysDate.diff(oDate, "days");
     let weeks = diffDays / 7;
-    if (weeks < 0) {
-      weeks = Math.round(weeks);
-    } else {
-      weeks = Math.round(weeks);
-    }
+
+    weeks = Math.abs(Math.round(weeks));
     let days = diffDays % 7;
-    if (days < 0) {
-      days = Math.round(days * 1) / 1;
-      days = -days;
-    } else {
-      days = Math.round(days * 1) / 1;
-    }
+    days =  Math.abs(Math.round(days * 1) / 1);
+
     if (diffDays >= 0) {
       this.patientDetails.lmp = moment(event.target.value).format("YYYY-MM-DD");
+      this.gsWeeks = weeks;
+      this.gsDays = days;
       const date = moment(event.target.value).add(280, "days");
       this.patientDetails.edd = moment(date).format("YYYY-MM-DD");
       this.patientDetails.gage = weeks + " weeks" + " " + days + " days";
@@ -532,7 +529,7 @@ export class AddobpatientComponent {
     }
   }
   updateEddDate(event: any) {
-    console.log(this.patientDetails.edd);
+    console.log(event);
     const todaysDate = moment(new Date());
     const oDate = moment(event.target.value);
     const diffDays = oDate.diff(todaysDate, "days");
@@ -540,26 +537,31 @@ export class AddobpatientComponent {
     const diffDays1 = dateOf.diff(todaysDate, "days");
 
     let weeks = diffDays1 / 7;
-    if (weeks < 0) {
-      weeks = Math.round(weeks);
-    } else {
-      weeks = Math.round(weeks);
-    }
+    weeks = Math.abs(Math.round(weeks));
+
     let days = diffDays1 % 7;
-    if (days < 0) {
-      days = Math.round(days * 1) / 1;
-      days = -days;
-    } else {
-      days = Math.round(days * 1) / 1;
-    }
+    days = Math.abs(Math.round(days * 1) / 1);
 
     if (diffDays >= -7) {
-      this.patientDetails.edd = moment(event.target.value).format("YYYY-MM-DD");
+      this.patientDetails.edd = moment(event.target.value).format();
+      console.log(weeks,days);
+      this.gsWeeks = weeks;
+      this.gsDays = days;
       const date = moment(event.target.value).subtract(280, "days");
-      this.patientDetails.lmp = moment(date).format("YYYY-MM-DD");
+      this.patientDetails.lmp = moment(date).format();
     } else {
       this.appService.warning("!Warning", "The EDD should not be before week.");
     }
+  }
+  updateDatesOnWeeksChange() {
+    const todaysDate = moment(new Date());
+    this.patientDetails.lmp = moment(todaysDate).subtract(this.gsWeeks,"weeks").subtract(this.gsDays,"days").format();
+    this.patientDetails.edd = moment(this.patientDetails.lmp).add(280, "days").format();
+  }
+  updateDatesOnDaysChange() {
+    const todaysDate = moment(new Date());
+    this.patientDetails.lmp = moment(todaysDate).subtract(this.gsWeeks,"weeks").subtract(this.gsDays,"days").format();
+    this.patientDetails.edd = moment(this.patientDetails.lmp).add(280, "days").format();
   }
   updatePostDate(event: any) {
     this.patientDetails.postpartumDate = moment(event.target.value).format(
@@ -657,6 +659,8 @@ export class AddobpatientComponent {
   }
 
   savePatientDetails() {
+    console.log(this.patientDetails);
+    console.log(this.patientType);
     if (
       this.patientDetails.fname.length <= 2 ||
       this.patientDetails.fname === ""
@@ -690,6 +694,7 @@ export class AddobpatientComponent {
     } else if (this.patientDetails.procedureTypesId === "") {
       this.appService.warning("!Warning", "Please select Procedure");
     } else {
+      console.log("in else",this.patientType);
       if (this.patientType === "update") {
         if (this.patientDetails.admitDate === "") {
           this.appService.warning("!Warning", "Please Fill Date Of Admit.");
@@ -711,20 +716,21 @@ export class AddobpatientComponent {
     this.getDetails();
     // this.appService.showLoader();
     this.homeService
-      .submitPatientDetails("patient/addPatient", this.patientDetails)
+      .submitPatientDetails("patient/addpat", this.patientDetails)
       .subscribe((data) => {
         // console.log(data.data);
         // this.appService.hideLoader();
         if (data) {
           this.appService.success("Success", "OB Patient Add Successfully.");
           if (this.patientType === "add" || this.patientType === "update") {
-            this.router.navigateByUrl("obpatients");
+            this.router.navigateByUrl("/ob-patients");
           } else {
             this.router.navigateByUrl("addschedulerappointment");
           }
         } else if (!data) {
           this.goToLoginScreen();
         } else {
+          console.log(this.appService.error);
           // this.appService.hideLoader();
           this.appService.error("!Error", "");
         }
@@ -859,91 +865,91 @@ export class AddobpatientComponent {
     }
   }
 
-  async getGastalAge() {
-    this.gsdays = [
-      { text: "0 day", value: "0" },
-      { text: "1 day", value: "0" },
-      { text: "2 days", value: "2" },
-      { text: "3 days", value: "3" },
-      { text: "4 days", value: "4" },
-      { text: "5 days", value: "5" },
-      { text: "6 days", value: "6" },
-    ];
+  // async getGastalAge() {
+  //   this.gsdays = [
+  //     { text: "0 day", value: "0" },
+  //     { text: "1 day", value: "0" },
+  //     { text: "2 days", value: "2" },
+  //     { text: "3 days", value: "3" },
+  //     { text: "4 days", value: "4" },
+  //     { text: "5 days", value: "5" },
+  //     { text: "6 days", value: "6" },
+  //   ];
 
-    this.gsWeeks = [
-      { text: "0 Weeks", value: "0" },
-      { text: "1 Week", value: "1" },
-      { text: "2 Weeks", value: "2" },
-      { text: "3 Weeks", value: "3" },
-      { text: "4 Weeks", value: "4" },
-      { text: "5 Weeks", value: "5" },
-      { text: "6 Weeks", value: "6" },
-      { text: "7 Weeks", value: "7" },
-      { text: "8 Weeks", value: "8" },
-      { text: "9 Weeks", value: "9" },
-      { text: "10 Weeks", value: "10" },
-      { text: "11 Weeks", value: "11" },
-      { text: "12 Weeks", value: "12" },
-      { text: "13 Weeks", value: "13" },
-      { text: "14 Weeks", value: "14" },
-      { text: "15 Weeks", value: "15" },
-      { text: "16 Weeks", value: "16" },
-      { text: "17 Weeks", value: "17" },
-      { text: "18 Weeks", value: "18" },
-      { text: "19 Weeks", value: "19" },
-      { text: "20 Weeks", value: "20" },
-      { text: "21 Weeks", value: "21" },
-      { text: "22 Weeks", value: "22" },
-      { text: "23 Weeks", value: "23" },
-      { text: "24 Weeks", value: "24" },
-      { text: "25 Weeks", value: "25" },
-      { text: "26 Weeks", value: "26" },
-      { text: "27 Weeks", value: "27" },
-      { text: "28 Weeks", value: "28" },
-      { text: "29 Weeks", value: "29" },
-      { text: "30 Weeks", value: "30" },
-      { text: "31 Weeks", value: "31" },
-      { text: "32 Weeks", value: "32" },
-      { text: "33 Weeks", value: "33" },
-      { text: "34 Weeks", value: "34" },
-      { text: "35 Weeks", value: "35" },
-      { text: "36 Weeks", value: "36" },
-      { text: "37 Weeks", value: "37" },
-      { text: "38 Weeks", value: "38" },
-      { text: "39 Weeks", value: "39" },
-      { text: "40 Weeks", value: "40" },
-      { text: "41 Weeks", value: "41" },
-      { text: "42 Weeks", value: "42" },
-    ];
+  //   this.gsWeeks = [
+  //     { text: "0 Weeks", value: "0" },
+  //     { text: "1 Week", value: "1" },
+  //     { text: "2 Weeks", value: "2" },
+  //     { text: "3 Weeks", value: "3" },
+  //     { text: "4 Weeks", value: "4" },
+  //     { text: "5 Weeks", value: "5" },
+  //     { text: "6 Weeks", value: "6" },
+  //     { text: "7 Weeks", value: "7" },
+  //     { text: "8 Weeks", value: "8" },
+  //     { text: "9 Weeks", value: "9" },
+  //     { text: "10 Weeks", value: "10" },
+  //     { text: "11 Weeks", value: "11" },
+  //     { text: "12 Weeks", value: "12" },
+  //     { text: "13 Weeks", value: "13" },
+  //     { text: "14 Weeks", value: "14" },
+  //     { text: "15 Weeks", value: "15" },
+  //     { text: "16 Weeks", value: "16" },
+  //     { text: "17 Weeks", value: "17" },
+  //     { text: "18 Weeks", value: "18" },
+  //     { text: "19 Weeks", value: "19" },
+  //     { text: "20 Weeks", value: "20" },
+  //     { text: "21 Weeks", value: "21" },
+  //     { text: "22 Weeks", value: "22" },
+  //     { text: "23 Weeks", value: "23" },
+  //     { text: "24 Weeks", value: "24" },
+  //     { text: "25 Weeks", value: "25" },
+  //     { text: "26 Weeks", value: "26" },
+  //     { text: "27 Weeks", value: "27" },
+  //     { text: "28 Weeks", value: "28" },
+  //     { text: "29 Weeks", value: "29" },
+  //     { text: "30 Weeks", value: "30" },
+  //     { text: "31 Weeks", value: "31" },
+  //     { text: "32 Weeks", value: "32" },
+  //     { text: "33 Weeks", value: "33" },
+  //     { text: "34 Weeks", value: "34" },
+  //     { text: "35 Weeks", value: "35" },
+  //     { text: "36 Weeks", value: "36" },
+  //     { text: "37 Weeks", value: "37" },
+  //     { text: "38 Weeks", value: "38" },
+  //     { text: "39 Weeks", value: "39" },
+  //     { text: "40 Weeks", value: "40" },
+  //     { text: "41 Weeks", value: "41" },
+  //     { text: "42 Weeks", value: "42" },
+  //   ];
 
-    // const picker = await this.pickerController.create({
-    //   buttons: [
-    //     {
-    //       text: 'Cancel',
-    //       role: 'cancel'
-    //     },
-    //     {
-    //       text: 'Confirm',
-    //       handler: (value) => {
-    //         console.log(`Got Value ${value}`, value);
-    //         this.patientDetails.gage = value.weeks.text + ' ' + value.days.text;
-    //         this.gagsValue = value.weeks.value + '|' + value.days.value;
-    //       }
-    //     }
-    //   ],
-    //   columns: [
-    //     {
-    //       name: 'weeks',
-    //       options: this.gsWeeks
-    //     },
-    //     {
-    //       name: 'days',
-    //       options: this.gsdays
-    //     },
-    //   ]
-    // });
-    // await picker.present();
-  }
+  //   // const picker = await this.pickerController.create({
+  //   //   buttons: [
+  //   //     {
+  //   //       text: 'Cancel',
+  //   //       role: 'cancel'
+  //   //     },
+  //   //     {
+  //   //       text: 'Confirm',
+  //   //       handler: (value) => {
+  //   //         console.log(`Got Value ${value}`, value);
+  //   //         this.patientDetails.gage = value.weeks.text + ' ' + value.days.text;
+  //   //         this.gagsValue = value.weeks.value + '|' + value.days.value;
+  //   //       }
+  //   //     }
+  //   //   ],
+  //   //   columns: [
+  //   //     {
+  //   //       name: 'weeks',
+  //   //       options: this.gsWeeks
+  //   //     },
+  //   //     {
+  //   //       name: 'days',
+  //   //       options: this.gsdays
+  //   //     },
+  //   //   ]
+  //   // });
+  //   // await picker.present();
+  // }
 
   goToLoginScreen() {
     localStorage.setItem("deviceToken", "");

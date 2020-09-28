@@ -199,6 +199,7 @@
                     matInput
                     [matDatepicker]="lmp"
                     [(ngModel)]="patientDetails.lmp"
+                    (dateChange)="updateLmpDate($event)"
                   />
                   <mat-datepicker-toggle
                     matSuffix
@@ -214,6 +215,7 @@
                     matInput
                     [matDatepicker]="edd"
                     [(ngModel)]="patientDetails.edd"
+                    (dateChange)="updateEddDate($event)"
                   />
                   <mat-datepicker-toggle
                     matSuffix
@@ -350,7 +352,7 @@
                   <mat-select
                     color="secondary"
                     [(ngModel)]="gsWeeks"
-                    (ngModelChange)="onGSWeeksChange($event)"
+                    (ngModelChange)="updateDatesOnWeeksChange()"
                   >
                     <mat-option
                       *ngFor="let value of gsWeeksList"
@@ -365,7 +367,7 @@
                   <mat-select
                     color="secondary"
                     [(ngModel)]="gsDays"
-                    (ngModelChange)="onGSWeeksChange($event)"
+                    (ngModelChange)="updateDatesOnDaysChange()"
                   >
                     <mat-option
                       *ngFor="let value of gsDaysList"
@@ -382,8 +384,8 @@
                   <mat-label>G </mat-label>
                   <mat-select
                     color="secondary"
-                    [(ngModel)]="gsWeeks"
-                    (ngModelChange)="onGSWeeksChange($event)"
+                    [(ngModel)]="gspsg"
+
                   >
                     <mat-option
                       *ngFor="let value of gsWeeksList"
@@ -397,8 +399,8 @@
                   <mat-label>T </mat-label>
                   <mat-select
                     color="secondary"
-                    [(ngModel)]="gsWeeks"
-                    (ngModelChange)="onGSWeeksChange($event)"
+                    [(ngModel)]="gspst"
+
                   >
                     <mat-option
                       *ngFor="let value of gsWeeksList"
@@ -412,8 +414,8 @@
                   <mat-label>P </mat-label>
                   <mat-select
                     color="secondary"
-                    [(ngModel)]="gsWeeks"
-                    (ngModelChange)="onGSWeeksChange($event)"
+                    [(ngModel)]="gspsp"
+
                   >
                     <mat-option
                       *ngFor="let value of gsWeeksList"
@@ -427,8 +429,7 @@
                   <mat-label>A </mat-label>
                   <mat-select
                     color="secondary"
-                    [(ngModel)]="gsWeeks"
-                    (ngModelChange)="onGSWeeksChange($event)"
+                    [(ngModel)]="gspsa"
                   >
                     <mat-option
                       *ngFor="let value of gsWeeksList"
@@ -442,8 +443,7 @@
                   <mat-label>L </mat-label>
                   <mat-select
                     color="secondary"
-                    [(ngModel)]="gsWeeks"
-                    (ngModelChange)="onGSWeeksChange($event)"
+                    [(ngModel)]="gspsl"
                   >
                     <mat-option
                       *ngFor="let value of gsWeeksList"
@@ -460,7 +460,6 @@
                   <mat-select
                     color="secondary"
                     [(ngModel)]="this.patientDetails.gbs"
-                    (ngModelChange)="onGSWeeksChange($event)"
                   >
                     <mat-option value="positive"> +ve</mat-option>
                     <mat-option value="negative"> -ve</mat-option>
@@ -615,6 +614,22 @@
                 <mat-datepicker #appointmentEndTime></mat-datepicker>
               </mat-form-field>
             </div>
+            <div class="col-md-4">
+              <mat-form-field appearance="outline" class="example-full-width">
+                <mat-label>Physicians Name</mat-label>
+                <mat-select
+                  color="secondary"
+                  [(ngModel)]="physicianName"
+                >
+                <mat-option
+                *ngFor="let value of physiciansList"
+                [value]="value"
+              >
+                {{ value }}</mat-option
+              >
+                </mat-select>
+              </mat-form-field>
+            </div>
           </div>
 
           <div class="col-12">
@@ -625,7 +640,7 @@
           </div>
           <div class="row col-md-12 mx-0 actionButtonsWrapper">
             <button mat-raised-button class="btn actionButtons">Cancel</button>
-            <button mat-raised-button class="btn btn-info actionButtons">
+            <button mat-raised-button class="btn btn-info actionButtons" (click)="savePatientDetails()">
               Save
             </button>
           </div>

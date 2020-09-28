@@ -177,7 +177,7 @@ export class ObPatientsComponent implements OnInit {
         patientDetails: "",
       },
     };
-    this.router.navigate(["addobpatient"], navigationExtras);
+    this.router.navigateByUrl("/addobpatient", navigationExtras);
   }
   goToAnlyticsPage() {
     this.router.navigateByUrl("/anlytics");

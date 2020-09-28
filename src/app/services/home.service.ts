@@ -87,7 +87,7 @@ export class HomeService {
 
   submitPatientDetails(endPoinr: any, patientData: any) {
     return this.http.put(
-      `${environment.api.baseUrl}apt/patientApptUpdate}`,
+      `${environment.api.baseUrl}patient/addpat`,
       patientData
     );
   }
