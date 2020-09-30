@@ -24,7 +24,7 @@
         Admission Status
       </th>
       <td mat-cell *matCellDef="let row">
-        <a [routerLink]="" (click)="openNewDialog()">
+        <a [routerLink]="" (click)="openNewDialog(row)">
           {{ row.admissionStatus }}
         </a>
       </td>

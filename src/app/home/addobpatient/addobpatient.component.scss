@@ -35,3 +35,22 @@
 .mat-radio-button ~ .mat-radio-button {
   margin-left: 16px;
 }
+
+ul {
+  list-style-type: none;
+  display: flex;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+.babyInfoRadio {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.otherRadioYN {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 2%;
+}

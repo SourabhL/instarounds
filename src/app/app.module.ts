@@ -24,6 +24,7 @@ import {
   MatTooltipModule,
   MatCheckboxModule,
   MatRadioModule,
+  MatFormFieldModule,
 } from "@angular/material";
 
 import { AboutComponent } from "./about/about.component";
@@ -88,6 +89,7 @@ import { NotificationService } from "./notification/notification.service";
     MatTooltipModule,
     MatCheckboxModule,
     MatRadioModule,
+    MatFormFieldModule,
   ],
   entryComponents: [
     AppComponent,

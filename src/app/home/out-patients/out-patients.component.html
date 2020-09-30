@@ -162,7 +162,7 @@
   <div *ngIf="gynPatientsList.length" class="row col-md-12 mx-0 p0 mt-4 mb-5">
     <app-gyn-patients
       [gynPatientsList]="gynPatientsList"
-      (openDialog)="openDialog()"
+      (openDialog)="openDialog($event)"
       class="row col-md-12 mx-0 p0"
     ></app-gyn-patients>
   </div>

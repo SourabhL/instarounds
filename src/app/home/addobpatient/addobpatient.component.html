@@ -90,7 +90,7 @@
               <mat-select
                 [(ngModel)]="patientDetails.hospitalID"
                 name="hospital"
-                (ngModelChange)="onhospitalChange($event)"
+                (ngModelChange)="handleHospitalChange($event)"
               >
                 <mat-option
                   *ngFor="let hospital of hospitalList"
@@ -107,12 +107,12 @@
               <mat-label>Patient Type :</mat-label>
               <mat-select
                 color="secondary"
-                [(ngModel)]="patientAddType"
+                [(ngModel)]="patientDetails.patientTypeId"
                 name="patientAddType"
-                (ngModelChange)="onPatientTypeChange($event)"
+                (ngModelChange)="onPatientTypeChange()"
               >
-                <mat-option value="OB"> OB</mat-option>
-                <mat-option value="GYN"> GYN</mat-option>
+                <mat-option value="1"> OB</mat-option>
+                <mat-option value="2"> GYN</mat-option>
               </mat-select>
             </mat-form-field>
           </div>
@@ -121,7 +121,7 @@
             <mat-form-field appearance="outline" class="example-full-width">
               <mat-label>Procedure</mat-label>
               <mat-select
-                *ngIf="patientDetails.patientTypeId === 1"
+                *ngIf="patientDetails.patientTypeId === '1'"
                 color="secondary"
                 [(ngModel)]="selectedOBProcedure"
                 (ngModelChange)="onProcedureChange($event)"
@@ -137,7 +137,7 @@
 
               <mat-select
                 color="secondary"
-                *ngIf="patientDetails.patientTypeId === 2"
+                *ngIf="patientDetails.patientTypeId === '2'"
                 multiple
                 placeholder="Procedure"
                 [(ngModel)]="selectedGYNProcedure"
@@ -154,13 +154,16 @@
           </div>
 
           <div class="row col-md-4 p0 mx-0">
-            <div class="col-11">
+            <div class="col-10">
               <mat-form-field appearance="outline" class="example-full-width">
                 <mat-label>Admit Date</mat-label>
                 <input
                   matInput
                   [matDatepicker]="admitDate"
                   [(ngModel)]="patientDetails.admitDate"
+                  (dateChange)="updateAdmitDate($event)"
+                  [min]="admitMinDate"
+                  [max]="admitMaxDate"
                 />
 
                 <mat-datepicker-toggle
@@ -170,7 +173,7 @@
                 <mat-datepicker #admitDate></mat-datepicker>
               </mat-form-field>
             </div>
-            <div class="col-1 pl-0">
+            <div class="col-2 pl-0">
               <mat-hint
                 align="end"
                 matTooltip="Set the date for patient admission. &#13;&#10;&#13;&#10; (NOTE: If the appointment date has been given, no need to fill the admit section)"
@@ -183,11 +186,12 @@
           <div
             class="row col-md-12 p0 mx-0"
             type="OB"
-            *ngIf="patientDetails.patientTypeId === 1"
+            *ngIf="patientDetails.patientTypeId === '1'"
           >
-            <div class="col-md-12 mb-1">
-              <h4 class="text-info">OB</h4>
+            <div class="col-md-12 mb-2">
+              <h3 class="text-info">OB</h3>
             </div>
+            <!-- Other than Postpartum and C-Section-->
             <div
               class="row col-md-12 p0 mx-0"
               *ngIf="selectedOBProcedure !== 3 && selectedOBProcedure !== 16"
@@ -225,17 +229,21 @@
                 </mat-form-field>
               </div>
             </div>
+
+            <!-- For Procedure - PostPartum-->
             <div
               class="row col-md-12 p0 mx-0"
               *ngIf="selectedOBProcedure === 3"
             >
               <div class="col-md-4">
                 <mat-form-field appearance="outline" class="example-full-width">
-                  <mat-label>Date</mat-label>
+                  <mat-label>Date:</mat-label>
                   <input
                     matInput
                     [matDatepicker]="postpartumDate"
                     [(ngModel)]="patientDetails.postpartumDate"
+                    (dateChange)="updatePostPatumDate($event)"
+                    [min]="postPartumMinDate"
                   />
                   <mat-datepicker-toggle
                     matSuffix
@@ -250,11 +258,12 @@
                   <input
                     matInput
                     [(ngModel)]="patientDetails.postpartumDay"
-                    [disabled]="true"
+                    [readonly]="true"
                   />
                 </mat-form-field>
               </div>
             </div>
+            <!-- For Procudure - C-Section -->
             <div
               class="row col-md-12 p0 mx-0 mb-3"
               *ngIf="selectedOBProcedure === 16"
@@ -265,85 +274,79 @@
                   <mat-label>C-Section Reason</mat-label>
                   <mat-select
                     color="secondary"
-                    [(ngModel)]="cSectionReason"
-                    (ngModelChange)="onGSWeeksChange($event)"
+                    [(ngModel)]="patientDetails.csecReason"
                   >
                     <mat-option
-                      *ngFor="let value of gsWeeksList"
-                      [value]="value"
+                      *ngFor="let reason of csectionReasonList"
+                      [value]="reason.id"
                     >
-                      {{ value }}</mat-option
+                      {{ reason.reason }}</mat-option
                     >
                   </mat-select>
                 </mat-form-field>
               </div>
-              <div class="col-md-12 mb-1">
-                <h6 class="text-secondary">Mode:</h6>
+              <div class="col-md-8">
+                <div class="col-md-12 mb-1">
+                  <h5>Mode:</h5>
+                </div>
+                <div class="col-md-12 mt-1 mb-1">
+                  <ul>
+                    <li *ngFor="let mode of cpModeList">
+                      <mat-checkbox
+                        color="primary"
+                        class="example-margin"
+                        [(ngModel)]="mode.isChecked"
+                        (ngModelChange)="handleModeChange($event)"
+                      >
+                        {{ mode.modeName }}
+                      </mat-checkbox>
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <div class="col-md-12 mb-1">
-                <section class="example-section">
-                  <!-- <ul>
-                      <li *ngFor="let subtask of task.subtasks">
-                        <mat-checkbox
-                          [(ngModel)]="subtask.completed"
-                          [color]="subtask.color"
-                          (ngModelChange)="updateAllComplete()"
-                        >
-                          {{ subtask.name }}
-                        </mat-checkbox>
-                      </li>
-                    </ul> -->
-                  <mat-checkbox class="example-margin" [(ngModel)]="checked"
-                    >Checked</mat-checkbox
+              <div class="col-md-4 otherRadioYN">
+                <div class="col-md-4 mt-2 mb-1 p0">
+                  <h5>Induced:</h5>
+                </div>
+                <div class="col-md-8 mt-2 mb-1 pt-1">
+                  <mat-radio-group
+                    aria-label="Select an option"
+                    [(ngModel)]="patientDetails.induced"
+                    color="primary"
                   >
-                  <mat-checkbox
-                    class="example-margin"
-                    [(ngModel)]="indeterminate"
-                    >Indeterminate</mat-checkbox
-                  >
-                </section>
-              </div>
-              <div class="col-md-12 mt-2 mb-1">
-                <h6 class="text-secondary">Induced:</h6>
-              </div>
-              <div class="col-md-12 mt-2 mb-1">
-                <section class="example-section">
-                  <mat-radio-group aria-label="Select an option">
-                    <mat-radio-button value="YES">Yes</mat-radio-button>
-                    <mat-radio-button value="NO">No</mat-radio-button>
+                    <mat-radio-button value="true">Yes</mat-radio-button>
+                    <mat-radio-button value="false">No</mat-radio-button>
                   </mat-radio-group>
-                </section>
+                </div>
               </div>
-              <div class="col-md-12 mt-3 mb-2">
-                <h6 class="text-secondary">Reason for Induced:</h6>
-              </div>
-              <div class="col-md-12 mb-3">
-                <section class="example-section">
-                  <!-- <ul>
-                      <li *ngFor="let subtask of task.subtasks">
+              <div class="col-md-8 p0">
+                <div
+                  class="col-md-12 mt-3 mb-2"
+                  *ngIf="patientDetails.induced === 'true'"
+                >
+                  <div class="col-md-12">
+                    <h5>Reason for Induced:</h5>
+                  </div>
+                  <div class="col-md-12 mt-1 mb-3">
+                    <ul>
+                      <li *ngFor="let reason of inReason">
                         <mat-checkbox
-                          [(ngModel)]="subtask.completed"
-                          [color]="subtask.color"
-                          (ngModelChange)="updateAllComplete()"
+                          color="primary"
+                          class="example-margin"
+                          [(ngModel)]="reason.isChecked"
+                          (ngModelChange)="handleInducedReasonChange($event)"
                         >
-                          {{ subtask.name }}
+                          {{ reason.irName }}
                         </mat-checkbox>
                       </li>
-                    </ul> -->
-                  <mat-checkbox class="example-margin" [(ngModel)]="checked"
-                    >Checked</mat-checkbox
-                  >
-                  <mat-checkbox
-                    class="example-margin"
-                    [(ngModel)]="indeterminate"
-                    >Indeterminate</mat-checkbox
-                  >
-                </section>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
 
             <div class="col-md-12 mt-2 mb-1">
-              <h6 class="text-secondary">Gestational Age</h6>
+              <h5>Gestational Age:</h5>
             </div>
             <div class="row col-md-12 p0 mx-0 mb-1">
               <div class="col-md-4">
@@ -367,7 +370,7 @@
                   <mat-select
                     color="secondary"
                     [(ngModel)]="gsDays"
-                    (ngModelChange)="updateDatesOnDaysChange()"
+                    (ngModelChange)="updateDatesOnWeeksChange()"
                   >
                     <mat-option
                       *ngFor="let value of gsDaysList"
@@ -382,73 +385,40 @@
               <div class="col-md-4">
                 <mat-form-field appearance="outline" class="gtpal_width">
                   <mat-label>G </mat-label>
-                  <mat-select
-                    color="secondary"
-                    [(ngModel)]="gspsg"
-
-                  >
-                    <mat-option
-                      *ngFor="let value of gsWeeksList"
-                      [value]="value"
-                    >
+                  <mat-select color="secondary" [(ngModel)]="gspsg">
+                    <mat-option *ngFor="let value of gspsList" [value]="value">
                       {{ value }}</mat-option
                     >
                   </mat-select>
                 </mat-form-field>
                 <mat-form-field appearance="outline" class="gtpal_width">
                   <mat-label>T </mat-label>
-                  <mat-select
-                    color="secondary"
-                    [(ngModel)]="gspst"
-
-                  >
-                    <mat-option
-                      *ngFor="let value of gsWeeksList"
-                      [value]="value"
-                    >
+                  <mat-select color="secondary" [(ngModel)]="gspst">
+                    <mat-option *ngFor="let value of gspsList" [value]="value">
                       {{ value }}</mat-option
                     >
                   </mat-select>
                 </mat-form-field>
                 <mat-form-field appearance="outline" class="gtpal_width">
                   <mat-label>P </mat-label>
-                  <mat-select
-                    color="secondary"
-                    [(ngModel)]="gspsp"
-
-                  >
-                    <mat-option
-                      *ngFor="let value of gsWeeksList"
-                      [value]="value"
-                    >
+                  <mat-select color="secondary" [(ngModel)]="gspsp">
+                    <mat-option *ngFor="let value of gspsList" [value]="value">
                       {{ value }}</mat-option
                     >
                   </mat-select>
                 </mat-form-field>
                 <mat-form-field appearance="outline" class="gtpal_width">
                   <mat-label>A </mat-label>
-                  <mat-select
-                    color="secondary"
-                    [(ngModel)]="gspsa"
-                  >
-                    <mat-option
-                      *ngFor="let value of gsWeeksList"
-                      [value]="value"
-                    >
+                  <mat-select color="secondary" [(ngModel)]="gspsa">
+                    <mat-option *ngFor="let value of gspsList" [value]="value">
                       {{ value }}</mat-option
                     >
                   </mat-select>
                 </mat-form-field>
                 <mat-form-field appearance="outline" class="gtpal_width">
                   <mat-label>L </mat-label>
-                  <mat-select
-                    color="secondary"
-                    [(ngModel)]="gspsl"
-                  >
-                    <mat-option
-                      *ngFor="let value of gsWeeksList"
-                      [value]="value"
-                    >
+                  <mat-select color="secondary" [(ngModel)]="gspsl">
+                    <mat-option *ngFor="let value of gspsList" [value]="value">
                       {{ value }}</mat-option
                     >
                   </mat-select>
@@ -461,11 +431,158 @@
                     color="secondary"
                     [(ngModel)]="this.patientDetails.gbs"
                   >
-                    <mat-option value="positive"> +ve</mat-option>
-                    <mat-option value="negative"> -ve</mat-option>
-                    <mat-option value="unknown"> Unknown</mat-option>
+                    <mat-option value="1"> +ve</mat-option>
+                    <mat-option value="2"> -ve</mat-option>
+                    <mat-option value="3"> Unknown</mat-option>
                   </mat-select>
                 </mat-form-field>
+              </div>
+            </div>
+
+            <div class="row col-md-12 p0 mt-2 mx-0 mb-1" type="babyInfo">
+              <div class="col-md-12 mt-2 mb-3">
+                <h5>Baby Info:</h5>
+              </div>
+              <div class="row col-md-12 p0 mx-0 mb-1">
+                <div class="row col-md-12 p0 mx-0 mb-2 mt-1">
+                  <div class="col-md-4">
+                    <mat-radio-group
+                      aria-label="Select an option"
+                      [(ngModel)]="patientDetails.babyInfo"
+                      color="primary"
+                    >
+                      <mat-radio-button value="1">Singleton</mat-radio-button>
+                      <mat-radio-button value="2">Twin</mat-radio-button>
+                      <mat-radio-button value="3">Other</mat-radio-button>
+                    </mat-radio-group>
+                  </div>
+
+                  <div class="col-md-4" *ngIf="patientDetails.babyInfo === '3'">
+                    <mat-form-field
+                      class="example-full-width"
+                      appearance="outline"
+                    >
+                      <mat-label>Other Info</mat-label>
+                      <input
+                        matInput
+                        [(ngModel)]="patientDetails.babyOtherInfo"
+                      />
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div class="row col-md-12 p0 mx-0 mb-2 mt-1">
+                  <div class="col-md-4">
+                    <mat-form-field
+                      class="example-full-width"
+                      appearance="outline"
+                    >
+                      <mat-label>Birth Weight</mat-label>
+                      <input
+                        type="number"
+                        matInput
+                        [(ngModel)]="patientDetails.birthWeight"
+                      />
+                    </mat-form-field>
+                  </div>
+                  <div class="col-md-4">
+                    <mat-form-field
+                      appearance="outline"
+                      class="example-full-width"
+                    >
+                      <mat-label>Birth Date</mat-label>
+                      <input
+                        matInput
+                        [matDatepicker]="babyBirthDate"
+                        [(ngModel)]="patientDetails.babyBirthDate"
+                        (dateChange)="updatebabyBirthDate($event)"
+                      />
+                      <mat-datepicker-toggle
+                        matSuffix
+                        [for]="babyBirthDate"
+                      ></mat-datepicker-toggle>
+                      <mat-datepicker #babyBirthDate></mat-datepicker>
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div class="col-md-4 otherRadioYN">
+                  <div class="col-md-4 mt-2 mb-1 p0">
+                    <h6 class="text-secondary">Sex of Baby:</h6>
+                  </div>
+                  <div class="col-md-8 mt-2 mb-1 p0">
+                    <mat-radio-group
+                      aria-label="Select an option"
+                      [(ngModel)]="patientDetails.babyGender"
+                      color="primary"
+                    >
+                      <mat-radio-button value="M">M</mat-radio-button>
+                      <mat-radio-button value="F">F</mat-radio-button>
+                    </mat-radio-group>
+                  </div>
+                </div>
+
+                <div class="col-md-4 otherRadioYN">
+                  <div class="col-md-4 mt-2 mb-1 p0">
+                    <h6 class="text-secondary">NICU:</h6>
+                  </div>
+                  <div class="col-md-8 mt-2 mb-1 p0">
+                    <mat-radio-group
+                      aria-label="Select an option"
+                      [(ngModel)]="patientDetails.nicu"
+                      color="primary"
+                    >
+                      <mat-radio-button value="true">Y</mat-radio-button>
+                      <mat-radio-button value="false">N</mat-radio-button>
+                    </mat-radio-group>
+                  </div>
+                </div>
+
+                <div class="col-md-4 otherRadioYN">
+                  <div class="col-md-4 mt-2 mb-1 p0">
+                    <h6 class="text-secondary">APGAR 5 min:</h6>
+                  </div>
+                  <div class="col-md-8 mt-2 mb-1 p0">
+                    <mat-radio-group
+                      aria-label="Select an option"
+                      [(ngModel)]="patientDetails.apgar"
+                      color="primary"
+                    >
+                      <mat-radio-button value=">7"> &gt;7</mat-radio-button>
+                      <mat-radio-button value="<7"> &lt;7</mat-radio-button>
+                    </mat-radio-group>
+                  </div>
+                </div>
+
+                <div class="col-md-4 otherRadioYN">
+                  <div class="col-md-4 mt-2 mb-1 p0">
+                    <h6 class="text-secondary">Live Birth:</h6>
+                  </div>
+                  <div class="col-md-8 mt-2 mb-1 p0">
+                    <mat-radio-group
+                      aria-label="Select an option"
+                      [(ngModel)]="patientDetails.liveBirth"
+                      color="primary"
+                    >
+                      <mat-radio-button value="true">Y</mat-radio-button>
+                      <mat-radio-button value="false">N</mat-radio-button>
+                    </mat-radio-group>
+                  </div>
+                </div>
+
+                <div class="col-md-4 otherRadioYN">
+                  <div class="col-md-4 mt-2 mb-1 p0">
+                    <h6 class="text-secondary">Vertex:</h6>
+                  </div>
+                  <div class="col-md-8 mt-2 mb-1 p0">
+                    <mat-radio-group
+                      aria-label="Select an option"
+                      [(ngModel)]="patientDetails.vertex"
+                      color="primary"
+                    >
+                      <mat-radio-button value="true">Y</mat-radio-button>
+                      <mat-radio-button value="false">N</mat-radio-button>
+                    </mat-radio-group>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -473,10 +590,10 @@
           <div
             class="row col-md-12 p0 mx-0"
             type="GYN"
-            *ngIf="patientDetails.patientTypeId === 2"
+            *ngIf="patientDetails.patientTypeId === '2'"
           >
             <div class="col-md-12 mb-1">
-              <h5 class="text-info">GYN</h5>
+              <h3 class="text-info">GYN</h3>
             </div>
             <div class="col-md-4">
               <mat-form-field appearance="outline" class="example-full-width">
@@ -517,14 +634,10 @@
                   name="ebl"
                   (ngModelChange)="onEblChange($event)"
                 >
-                  <mat-option value="{{ babyAPGARLes }}">{{
-                    babyAPGARLes
-                  }}</mat-option>
+                  <mat-option value="<7">&lt;7</mat-option>
                   <mat-option value="100-300 cc">100-300 cc</mat-option>
                   <mat-option value="300-700 cc">300-700 cc</mat-option>
-                  <mat-option value="{{ babyAPGARGa }}">{{
-                    babyAPGARGa
-                  }}</mat-option>
+                  <mat-option value=">7">&gt;7</mat-option>
                 </mat-select>
               </mat-form-field>
             </div>
@@ -569,6 +682,7 @@
           </div>
           <hr class="mt-2 mb-3" />
           <div class="row col-md-12 p0 mx-0">
+            <hr />
             <div class="col-md-12 mb-1">
               <h5 class="text-info">
                 Appointment
@@ -614,22 +728,19 @@
                 <mat-datepicker #appointmentEndTime></mat-datepicker>
               </mat-form-field>
             </div>
-            <div class="col-md-4">
+            <!-- <div class="col-md-4">
               <mat-form-field appearance="outline" class="example-full-width">
                 <mat-label>Physicians Name</mat-label>
-                <mat-select
-                  color="secondary"
-                  [(ngModel)]="physicianName"
-                >
-                <mat-option
-                *ngFor="let value of physiciansList"
-                [value]="value"
-              >
-                {{ value }}</mat-option
-              >
+                <mat-select color="secondary" [(ngModel)]="physicianName">
+                  <mat-option
+                    *ngFor="let value of physiciansList"
+                    [value]="value"
+                  >
+                    {{ value }}</mat-option
+                  >
                 </mat-select>
               </mat-form-field>
-            </div>
+            </div> -->
           </div>
 
           <div class="col-12">
@@ -639,8 +750,18 @@
             </mat-form-field>
           </div>
           <div class="row col-md-12 mx-0 actionButtonsWrapper">
-            <button mat-raised-button class="btn actionButtons">Cancel</button>
-            <button mat-raised-button class="btn btn-info actionButtons" (click)="savePatientDetails()">
+            <button
+              mat-raised-button
+              class="btn actionButtons"
+              (click)="patientsTypeSelection()"
+            >
+              Cancel
+            </button>
+            <button
+              mat-raised-button
+              class="btn btn-info actionButtons"
+              (click)="savePatientDetails()"
+            >
               Save
             </button>
           </div>

@@ -50,6 +50,7 @@ export class ObPatientsComponent implements OnInit {
     }
   }
   openDialog(patientRow) {
+    console.log(patientRow);
     const dialogConfig = new MatDialogConfig();
     dialogConfig.disableClose = true;
     dialogConfig.autoFocus = true;
@@ -203,25 +204,29 @@ export class ObPatientsComponent implements OnInit {
 
   DischargePatient(item: any) {
     console.log(item);
-    const userdata = {
-      token: localStorage.getItem("deviceToken"),
-      patientDetailsId: item.mstUsers.userId,
-    };
-    //this.appService.showLoader();
-    this.loginSer.fetchDischargePatient(userdata).subscribe((data: any) => {
-      console.log(data.data);
-      //this.appService.hideLoader();
-      this.getPatients();
+    try {
+      const userdata = {
+        token: localStorage.getItem("deviceToken"),
+        patientDetailsId: item.mstUsers.userId,
+      };
+      //this.appService.showLoader();
+      this.loginSer.fetchDischargePatient(userdata).subscribe((data: any) => {
+        console.log(data.data);
+        //this.appService.hideLoader();
+        this.getPatients();
 
-      // if (data.status) {
-      //   this.getPatients();
-      // } else if (!data.status) {
-      //   this.goToLoginScreen();
-      // } else {
-      //   //  this.appService.hideLoader();
-      //   this.appService.alert("!Error", data.message);
-      // }
-    });
+        // if (data.status) {
+        //   this.getPatients();
+        // } else if (!data.status) {
+        //   this.goToLoginScreen();
+        // } else {
+        //   //  this.appService.hideLoader();
+        //   this.appService.alert("!Error", data.message);
+        // }
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
 @Component({
