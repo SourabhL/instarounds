@@ -160,7 +160,7 @@ export class GynPatientsComponent implements OnInit {
         patientDetails: item,
       },
     };
-    this.router.navigate(["addgynpatients"], navigationExtras);
+    this.router.navigate(["addobpatient"], navigationExtras);
   }
 
   goToLoginScreen() {

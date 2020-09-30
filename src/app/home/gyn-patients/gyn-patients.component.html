@@ -33,7 +33,7 @@
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Actions</th>
       <td mat-cell *matCellDef="let row">
-        <a routerLink="/your-link"> view/edit</a>
+        <a href="javascript:;" (click)="goToUpdatePatient(row)"> view/edit</a>
       </td>
     </ng-container>
 

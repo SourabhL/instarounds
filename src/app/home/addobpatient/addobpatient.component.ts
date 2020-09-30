@@ -44,13 +44,20 @@ export class AddobpatientComponent {
     apgar: "",
     liveBirth: "",
     vertex: "",
-
+    // Gestational Age
     gage: "", // Weeks|Days
     gsps: "", // G|T|P|A|L
     gbs: "", // GBS - +/-
 
+    // GYN
+    surgeryDate: "",
+    surgeon: "",
     preop: "",
-
+    ebl: "",
+    complications: "",
+    fcm: "",
+    postop: "",
+    // Appointment
     appointmentStartTime: "",
     appointmentEndTime: "",
     desc: "",
@@ -89,7 +96,7 @@ export class AddobpatientComponent {
   postPartumMaxDate: any;
   admitMinDate: any;
   admitMaxDate: any;
-
+  dateOfSurgeryMinDate: any;
   //gagsValue = "";
   //procUpdate = false;
 
@@ -107,9 +114,10 @@ export class AddobpatientComponent {
     const admindate = moment(Date.now()).subtract(30, "days");
     this.admitMinDate = moment(admindate).format("YYYY-MM-DD");
     this.admitMaxDate = moment(Date.now()).format("YYYY-MM-DD");
-    this.gsWeeksList = Array.from({ length: 43 }, (v, k) => k);
-    this.gsDaysList = Array.from({ length: 7 }, (v, k) => k);
-    this.gspsList = Array.from({ length: 16 }, (v, k) => k);
+    this.gsWeeksList = Array.from({ length: 43 }, (v, k) => k.toString());
+    this.gsDaysList = Array.from({ length: 7 }, (v, k) => k.toString());
+    this.gspsList = Array.from({ length: 16 }, (v, k) => k.toString());
+    this.dateOfSurgeryMinDate = moment(Date.now()).format("YYYY-MM-DD");
 
     this.getHospitals();
     const userData = JSON.parse(localStorage.getItem("userData"));
@@ -124,7 +132,7 @@ export class AddobpatientComponent {
       if (this.router.getCurrentNavigation().extras.state) {
         this.patientType = this.router.getCurrentNavigation().extras.state.patientType;
         this.updatePatient = this.router.getCurrentNavigation().extras.state.patientDetails;
-        // this.getHospitals();
+        this.getHospitals();
         console.log(this.updatePatient);
       }
     });
@@ -278,8 +286,12 @@ export class AddobpatientComponent {
   }
 
   // *** Procedure ***
-  onProcedureChange(event: any) {
-    this.patientDetails.procedureTypesId = event;
+  onProcedureChange(value: any) {
+    this.patientDetails.procedureTypesId = Array.isArray(value)
+      ? value.join(",")
+      : value;
+
+    console.log(this.patientDetails.procedureTypesId);
   }
 
   // *** Admit Date ***
@@ -367,6 +379,82 @@ export class AddobpatientComponent {
   // **** Baby: Birth Date ****
   updatebabyBirthDate(event: any) {
     this.patientDetails.babyBirthDate = moment(event).format("YYYY-MM-DD");
+  }
+
+  //*************** GYN Fields *****************/
+
+  handleSurgeryDateChange(event: any) {
+    console.log(event);
+    this.patientDetails.surgeryDate = moment(event.target.value).format(
+      "YYYY-MM-DD"
+    );
+
+    const oDate = moment(moment(event.target.value).format("YYYY-MM-DD"));
+    const todaysDate = moment(moment(new Date()).format("YYYY-MM-DD"));
+    const diffDays = oDate.diff(todaysDate, "days");
+    this.patientDetails.preop = diffDays;
+  }
+
+  // **** Set final values from selected Form Values to be submitted ****
+  getDetails() {
+    this.patientDetails.hospitalID = this.patientDetails.hospitalID.toString();
+    this.patientDetails.birthWeight = this.patientDetails.birthWeight.toString();
+    this.patientDetails.procedureTypesId = this.patientDetails.procedureTypesId.toString();
+    if (this.patientType === "add" || this.patientType === "update") {
+      this.patientDetails.admitDate = moment(
+        this.patientDetails.admitDate
+      ).format("MM-DD-YYYY");
+    } else {
+      this.patientDetails.admitDate = "";
+    }
+
+    if (this.patientDetails.lmp !== "") {
+      this.patientDetails.lmp = moment(this.patientDetails.lmp).format(
+        "MM-DD-YYYY"
+      );
+    }
+    if (this.patientDetails.edd !== "") {
+      this.patientDetails.edd = moment(this.patientDetails.edd).format(
+        "MM-DD-YYYY"
+      );
+    }
+    if (this.patientDetails.postpartumDate !== "") {
+      this.patientDetails.postpartumDate = moment(
+        this.patientDetails.postpartumDate
+      ).format("MM-DD-YYYY");
+    }
+    if (this.patientDetails.babyBirthDate !== "") {
+      this.patientDetails.babyBirthDate = moment(
+        this.patientDetails.babyBirthDate
+      ).format("MM-DD-YYYY");
+    }
+
+    this.patientDetails.gsps =
+      this.gspsg +
+      "|" +
+      this.gspst +
+      "|" +
+      this.gspsp +
+      "|" +
+      this.gspsa +
+      "|" +
+      this.gspsl;
+
+    if (this.patientDetails.induced !== "true") {
+      this.patientDetails.inducedReason = "";
+    }
+
+    if (this.patientDetails.babyInfo === "3") {
+      this.patientDetails.babyInfo = this.patientDetails.babyOtherInfo.toString();
+    } else {
+      if (this.patientDetails.babyInfo !== "") {
+        this.patientDetails.babyInfo = this.patientDetails.babyInfo.toString();
+      } else {
+        this.patientDetails.babyInfo = "";
+      }
+    }
+
+    console.log(this.patientDetails);
   }
 
   // **** On Save Button Click ****
@@ -460,14 +548,17 @@ export class AddobpatientComponent {
   // **** Submit -- Update  Patient Details - API Call ****
   updatePatientForm() {
     this.getDetails();
+
+    // *** UserId ***
     this.patientDetails[
       "userId"
     ] = this.updatePatient.mstUsers.userId.toString();
+    // *** patientDetailsId ***
     this.patientDetails["patientDetailsId"] = this.updatePatient.id.toString();
-    // console.log(this.patientDetails);
-    // this.appService.showLoader();
+
+    // Update Details
     this.homeService
-      .submitPatientDetails("patient/addPatient", this.patientDetails)
+      .submitPatientDetails("patient/updatePatient", this.patientDetails)
       .subscribe((data) => {
         console.log(data);
         // this.appService.hideLoader();
@@ -487,68 +578,6 @@ export class AddobpatientComponent {
       });
   }
 
-  // **** Set final values from selected Form Values to be submitted ****
-  getDetails() {
-    this.patientDetails.hospitalID = this.patientDetails.hospitalID.toString();
-    this.patientDetails.birthWeight = this.patientDetails.birthWeight.toString();
-    this.patientDetails.procedureTypesId = this.patientDetails.procedureTypesId.toString();
-    if (this.patientType === "add" || this.patientType === "update") {
-      this.patientDetails.admitDate = moment(
-        this.patientDetails.admitDate
-      ).format("MM-DD-YYYY");
-    } else {
-      this.patientDetails.admitDate = "";
-    }
-
-    if (this.patientDetails.lmp !== "") {
-      this.patientDetails.lmp = moment(this.patientDetails.lmp).format(
-        "MM-DD-YYYY"
-      );
-    }
-    if (this.patientDetails.edd !== "") {
-      this.patientDetails.edd = moment(this.patientDetails.edd).format(
-        "MM-DD-YYYY"
-      );
-    }
-    if (this.patientDetails.postpartumDate !== "") {
-      this.patientDetails.postpartumDate = moment(
-        this.patientDetails.postpartumDate
-      ).format("MM-DD-YYYY");
-    }
-    if (this.patientDetails.babyBirthDate !== "") {
-      this.patientDetails.babyBirthDate = moment(
-        this.patientDetails.babyBirthDate
-      ).format("MM-DD-YYYY");
-    }
-
-    this.patientDetails.gsps =
-      this.gspsg +
-      "|" +
-      this.gspst +
-      "|" +
-      this.gspsp +
-      "|" +
-      this.gspsa +
-      "|" +
-      this.gspsl;
-
-    if (this.patientDetails.induced !== "true") {
-      this.patientDetails.inducedReason = "";
-    }
-
-    if (this.patientDetails.babyInfo === "Other") {
-      this.patientDetails.babyInfo = this.patientDetails.babyOtherInfo.toString();
-    } else {
-      if (this.patientDetails.babyInfo !== "") {
-        this.patientDetails.babyInfo = this.patientDetails.babyInfo.toString();
-      } else {
-        this.patientDetails.babyInfo = "";
-      }
-    }
-
-    console.log(this.patientDetails);
-  }
-
   // **** Fill Details in the form, for Patient to be edited ****
   fillEditPatientFormDetails() {
     // *** First Name - Last Name ***
@@ -556,19 +585,17 @@ export class AddobpatientComponent {
     this.patientDetails.lname = this.updatePatient.mstUsers.lastName;
 
     // *** Room No ***
-    if (
-      this.updatePatient.roomNumber === null ||
-      this.updatePatient.roomNumber === ""
-    ) {
-      this.patientDetails.roomNo = "";
-    } else {
+    if (this.updatePatient.roomNumber) {
       this.patientDetails.roomNo = this.updatePatient.roomNumber;
     }
     // *** Hospital ID ***
     this.patientDetails.hospitalID = this.updatePatient.hospital.id;
 
     // *** Procedures ***
-    if (this.updatePatient.patientProceduresList.length > 0) {
+    if (
+      this.updatePatient.patientProceduresList &&
+      this.updatePatient.patientProceduresList.length
+    ) {
       this.updatePatient.patientProceduresList.forEach((proce, index) => {
         this.selectedGYNProcedure.push(proce.procedureTypes.id.toString());
         if (index === 0) {
@@ -588,7 +615,7 @@ export class AddobpatientComponent {
         this.updatePatient.admittedDate
       ).format("YYYY-MM-DD");
     }
-
+    console.log("admitDate", this.patientDetails.admitDate);
     // *** LMP - EDD ***
     if (this.updatePatient.lmp) {
       this.patientDetails.lmp = moment(this.updatePatient.lmp).format(
@@ -600,6 +627,8 @@ export class AddobpatientComponent {
         "YYYY-MM-DD"
       );
     }
+    console.log("lmp", this.patientDetails.lmp);
+    console.log("edd", this.patientDetails.edd);
 
     // *** Postpartum Date ***
     if (this.updatePatient.postDate) {
@@ -608,23 +637,28 @@ export class AddobpatientComponent {
       ).format("YYYY-MM-DD");
     }
 
-    if (this.updatePatient.babyBirthDate) {
-      this.patientDetails.babyBirthDate = moment(
-        this.updatePatient.babyBirthDate
-      ).format("YYYY-MM-DD");
+    // **** gage ****
+    if (this.updatePatient.gage) {
+      const gabs = this.updatePatient.gage.split("|");
+
+      this.gsWeeks = gabs[0];
+      this.gsDays = gabs[1];
+
+      this.patientDetails.gage = this.updatePatient.gage;
     }
 
-    // if (this.updatePatient.gage === null || this.updatePatient.gage === "") {
-    //   this.patientDetails.gage = "";
-    // } else {
-    //   // const gabs = this.updatePatient.gage.split("|");
-    //   // this.patientDetails.gage = gabs[0] + "weeks" + " " + gabs[0] + "days";
-    // }
+    if (this.updatePatient.induced !== null) {
+      if (this.updatePatient.induced) {
+        this.patientDetails.induced = "true";
+      } else {
+        this.patientDetails.induced = "false";
+      }
+    }
 
     if (this.updatePatient.gbs === null || this.updatePatient.gbs === "") {
       this.patientDetails.gbs = "";
     } else {
-      this.patientDetails.gbs = this.updatePatient.gbs.toString();
+      this.patientDetails.gbs = this.updatePatient.gbs;
     }
     if (
       this.updatePatient.pcrList === null ||
@@ -635,7 +669,7 @@ export class AddobpatientComponent {
       this.patientDetails.csecReason = this.updatePatient.pcrList[0].csReason.id.toString();
     }
 
-    if (this.updatePatient.daysList.length > 0) {
+    if (this.updatePatient.daysList && this.updatePatient.daysList.length) {
       this.updatePatient.daysList.forEach((info) => {
         const data = {
           expanded: false,
@@ -650,7 +684,7 @@ export class AddobpatientComponent {
       this.patientDetails.preop = this.updatePatient.preOp.toString();
     }
 
-    if (this.updatePatient.pcpmList.length > 0) {
+    if (this.updatePatient.pcpmList && this.updatePatient.pcpmList.length > 0) {
       this.updatePatient.pcpmList.forEach((proce) => {
         this.cpModeList.forEach((mode) => {
           if (proce.cpMode.id === mode.id) {
@@ -660,7 +694,7 @@ export class AddobpatientComponent {
       });
     }
 
-    if (this.updatePatient.pirList.length > 0) {
+    if (this.updatePatient.pirList && this.updatePatient.pirList.length > 0) {
       this.updatePatient.pirList.forEach((pir) => {
         this.inReason.forEach((resion) => {
           if (pir.ir.id === resion.id) {
@@ -680,81 +714,58 @@ export class AddobpatientComponent {
       this.patientDetails.gsps = this.updatePatient.gsPs;
       const gbs = this.updatePatient.gsPs.split("|");
       if (gbs.length === 5) {
-        this.gspsg = gbs[0].toString();
-        this.gspst = gbs[1].toString();
-        this.gspsp = gbs[2].toString();
-        this.gspsa = gbs[3].toString();
-        this.gspsl = gbs[4].toString();
+        this.gspsg = gbs[0];
+        this.gspst = gbs[1];
+        this.gspsp = gbs[2];
+        this.gspsa = gbs[3];
+        this.gspsl = gbs[4];
       } else if (gbs.length === 4) {
-        this.gspsg = gbs[0].toString();
-        this.gspst = gbs[1].toString();
-        this.gspsp = gbs[2].toString();
-        this.gspsa = gbs[3].toString();
+        this.gspsg = gbs[0];
+        this.gspst = gbs[1];
+        this.gspsp = gbs[2];
+        this.gspsa = gbs[3];
       } else if (gbs.length === 3) {
-        this.gspsg = gbs[0].toString();
-        this.gspst = gbs[1].toString();
-        this.gspsp = gbs[2].toString();
+        this.gspsg = gbs[0];
+        this.gspst = gbs[1];
+        this.gspsp = gbs[2];
       } else if (gbs.length === 2) {
-        this.gspsg = gbs[0].toString();
-        this.gspst = gbs[1].toString();
+        this.gspsg = gbs[0];
+        this.gspst = gbs[1];
       } else if (gbs.length === 1) {
-        this.gspsg = gbs[0].toString();
+        this.gspsg = gbs[0];
       }
     }
-
-    // **** Baby Info ****
-    if (
-      this.updatePatient.babyInfo === null ||
-      this.updatePatient.babyInfo === ""
-    ) {
-      this.patientDetails.babyInfo = "";
-    } else {
+    console.log(this.gspsg);
+    console.log(this.gspst);
+    console.log(this.gspsp);
+    console.log(this.gspsa);
+    console.log(this.gspsl);
+    // ************* Baby Info *****************
+    if (this.updatePatient.babyInfo) {
       if (
         this.updatePatient.babyInfo === 1 ||
         this.updatePatient.babyInfo === 2
       ) {
         this.patientDetails.babyInfo = this.updatePatient.babyInfo.toString();
       } else {
-        this.patientDetails.babyInfo = "Other";
-        this.patientDetails.babyOtherInfo = this.updatePatient.babyInfo.toString();
+        this.patientDetails.babyInfo = "3";
+        this.patientDetails.babyOtherInfo =
+          this.updatePatient.babyInfo.toString() || "";
       }
     }
 
-    if (
-      this.updatePatient.birthWeight === null ||
-      this.updatePatient.birthWeight === ""
-    ) {
-      this.patientDetails.birthWeight = "";
-    } else {
+    if (this.updatePatient.birthWeight) {
       this.patientDetails.birthWeight = this.updatePatient.birthWeight;
     }
-    if (
-      this.updatePatient.babyGender === null ||
-      this.updatePatient.babyGender === ""
-    ) {
-      this.patientDetails.babyGender = "";
-    } else {
+
+    if (this.updatePatient.babyBirthDate) {
+      this.patientDetails.babyBirthDate = moment(
+        this.updatePatient.babyBirthDate
+      ).format("YYYY-MM-DD");
+    }
+
+    if (this.updatePatient.babyGender) {
       this.patientDetails.babyGender = this.updatePatient.babyGender;
-    }
-
-    if (this.updatePatient.apgar === null || this.updatePatient.apgar === "") {
-      this.patientDetails.apgar = "";
-    } else {
-      this.patientDetails.apgar = this.updatePatient.apgar;
-    }
-
-    if (this.updatePatient.apgar === null || this.updatePatient.apgar === "") {
-      this.patientDetails.apgar = "";
-    } else {
-      this.patientDetails.apgar = this.updatePatient.apgar;
-    }
-
-    if (this.updatePatient.induced !== null) {
-      if (this.updatePatient.induced) {
-        this.patientDetails.induced = "true";
-      } else {
-        this.patientDetails.induced = "false";
-      }
     }
 
     if (this.updatePatient.nicu !== null) {
@@ -763,6 +774,12 @@ export class AddobpatientComponent {
       } else {
         this.patientDetails.nicu = "false";
       }
+    }
+
+    if (this.updatePatient.apgar === null || this.updatePatient.apgar === "") {
+      this.patientDetails.apgar = "";
+    } else {
+      this.patientDetails.apgar = this.updatePatient.apgar;
     }
 
     if (this.updatePatient.liveBirth !== null) {

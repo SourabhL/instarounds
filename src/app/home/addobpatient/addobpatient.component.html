@@ -182,7 +182,7 @@
               ></mat-hint>
             </div>
           </div>
-
+          <!-- OB Fields -->
           <div
             class="row col-md-12 p0 mx-0"
             type="OB"
@@ -586,7 +586,7 @@
               </div>
             </div>
           </div>
-
+          <!-- GYN Fields -->
           <div
             class="row col-md-12 p0 mx-0"
             type="GYN"
@@ -600,8 +600,10 @@
                 <mat-label>Date Of Surgery </mat-label>
                 <input
                   matInput
+                  [min]="dateOfSurgeryMinDate"
                   [matDatepicker]="picker1"
-                  [(ngModel)]="patientDetails.dos"
+                  [(ngModel)]="patientDetails.surgeryDate"
+                  (dateChange)="handleSurgeryDateChange($event)"
                 />
                 <mat-datepicker-toggle
                   matSuffix
@@ -621,7 +623,11 @@
             <div class="col-md-4">
               <mat-form-field class="example-full-width" appearance="outline">
                 <mat-label>Pre-op Diagnosis</mat-label>
-                <input matInput [(ngModel)]="preopDiag" />
+                <input
+                  [readonly]="true"
+                  matInput
+                  [(ngModel)]="patientDetails.preop"
+                />
               </mat-form-field>
             </div>
 
