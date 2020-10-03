@@ -247,7 +247,7 @@ export class OutPatientsComponent implements OnInit {
     console.log(item);
     const userdata = {
       token: localStorage.getItem("deviceToken"),
-      patientDetailsId: item.mstUsers.userId,
+      patientDetailsId: item.id,
     };
     // this.appService.showLoader();
     this.loginSer.fetchReAdmitPatient(userdata).subscribe((data: any) => {

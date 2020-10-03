@@ -92,6 +92,13 @@ export class HomeService {
     );
   }
 
+  updatePatientDetails(endPoinr: any, patientData: any) {
+    return this.http.put(
+      `${environment.api.baseUrl}patient/updatePatient`,
+      patientData
+    );
+  }
+
   submitAppoinmentDetails(endPoinr: any, patientData: any) {
     return this.http.put(
       `${environment.api.baseUrl}apt/patientAppointment}`,

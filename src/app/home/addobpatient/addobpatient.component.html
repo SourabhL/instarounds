@@ -18,7 +18,7 @@
         >
       </li>
       <li>
-        <a href="javascript:void(0)">MD to MD</a>
+        <a href="javascript:void(0)">MD Connect</a>
       </li>
       <li>
         <a href="javascript:void(0)">Schedule</a>
@@ -159,6 +159,7 @@
                 <mat-label>Admit Date</mat-label>
                 <input
                   matInput
+                  [readonly]="true"
                   [matDatepicker]="admitDate"
                   [(ngModel)]="patientDetails.admitDate"
                   (dateChange)="updateAdmitDate($event)"
@@ -201,8 +202,10 @@
                   <mat-label>LMP</mat-label>
                   <input
                     matInput
+                    [readonly]="true"
                     [matDatepicker]="lmp"
                     [(ngModel)]="patientDetails.lmp"
+                    [max]="lmpMaxDate"
                     (dateChange)="updateLmpDate($event)"
                   />
                   <mat-datepicker-toggle
@@ -269,44 +272,61 @@
               *ngIf="selectedOBProcedure === 16"
               type="OB-C-Section"
             >
-              <div class="col-md-4">
-                <mat-form-field appearance="outline" class="example-full-width">
-                  <mat-label>C-Section Reason</mat-label>
-                  <mat-select
-                    color="secondary"
-                    [(ngModel)]="patientDetails.csecReason"
+              <div class="row col-md-12 mt-2 mb-1 p0 mx-0">
+                <div class="col-md-4">
+                  <mat-form-field
+                    appearance="outline"
+                    class="example-full-width"
                   >
-                    <mat-option
-                      *ngFor="let reason of csectionReasonList"
-                      [value]="reason.id"
+                    <mat-label>C-Section Reason</mat-label>
+                    <mat-select
+                      color="secondary"
+                      [(ngModel)]="patientDetails.csecReason"
                     >
-                      {{ reason.reason }}</mat-option
-                    >
-                  </mat-select>
-                </mat-form-field>
-              </div>
-              <div class="col-md-8">
-                <div class="col-md-12 mb-1">
-                  <h5>Mode:</h5>
-                </div>
-                <div class="col-md-12 mt-1 mb-1">
-                  <ul>
-                    <li *ngFor="let mode of cpModeList">
-                      <mat-checkbox
-                        color="primary"
-                        class="example-margin"
-                        [(ngModel)]="mode.isChecked"
-                        (ngModelChange)="handleModeChange($event)"
+                      <mat-option
+                        *ngFor="let reason of csectionReasonList"
+                        [value]="reason.id"
                       >
-                        {{ mode.modeName }}
-                      </mat-checkbox>
-                    </li>
-                  </ul>
+                        {{ reason.reason }}</mat-option
+                      >
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <div class="col-md-3" *ngIf="patientDetails.csecReason === 13">
+                  <mat-form-field
+                    class="example-full-width"
+                    appearance="outline"
+                  >
+                    <mat-label>Other C-Section Reason</mat-label>
+                    <input
+                      matInput
+                      [(ngModel)]="patientDetails.babyOtherInfo"
+                    />
+                  </mat-form-field>
+                </div>
+                <div class="col-md-4">
+                  <div class="col-md-12 mb-1">
+                    <h5 class="text-secondary">Mode:</h5>
+                  </div>
+                  <div class="col-md-12 mt-1 mb-1">
+                    <ul>
+                      <li *ngFor="let mode of cpModeList">
+                        <mat-checkbox
+                          color="primary"
+                          class="example-margin"
+                          [(ngModel)]="mode.isChecked"
+                          (ngModelChange)="handleModeChange($event)"
+                        >
+                          {{ mode.modeName }}
+                        </mat-checkbox>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
-              <div class="col-md-4 otherRadioYN">
+              <div class="col-md-4 inducedReason">
                 <div class="col-md-4 mt-2 mb-1 p0">
-                  <h5>Induced:</h5>
+                  <h5 class="text-secondary">Induced:</h5>
                 </div>
                 <div class="col-md-8 mt-2 mb-1 pt-1">
                   <mat-radio-group
@@ -325,7 +345,7 @@
                   *ngIf="patientDetails.induced === 'true'"
                 >
                   <div class="col-md-12">
-                    <h5>Reason for Induced:</h5>
+                    <h5 class="text-secondary">Reason for Induced:</h5>
                   </div>
                   <div class="col-md-12 mt-1 mb-3">
                     <ul>
@@ -346,7 +366,7 @@
             </div>
 
             <div class="col-md-12 mt-2 mb-1">
-              <h5>Gestational Age:</h5>
+              <h5 class="text-secondary">Gestational Age:</h5>
             </div>
             <div class="row col-md-12 p0 mx-0 mb-1">
               <div class="col-md-4">
@@ -441,7 +461,7 @@
 
             <div class="row col-md-12 p0 mt-2 mx-0 mb-1" type="babyInfo">
               <div class="col-md-12 mt-2 mb-3">
-                <h5>Baby Info:</h5>
+                <h5 class="text-secondary">Baby Info:</h5>
               </div>
               <div class="row col-md-12 p0 mx-0 mb-1">
                 <div class="row col-md-12 p0 mx-0 mb-2 mt-1">
@@ -640,6 +660,7 @@
                   name="ebl"
                   (ngModelChange)="onEblChange($event)"
                 >
+                  <mat-option value="0"></mat-option>
                   <mat-option value="<7">&lt;7</mat-option>
                   <mat-option value="100-300 cc">100-300 cc</mat-option>
                   <mat-option value="300-700 cc">300-700 cc</mat-option>
@@ -662,8 +683,8 @@
                   color="secondary"
                   [(ngModel)]="patientDetails.fcm"
                   name="fcm"
-                  (ngModelChange)="onCatheterChange($event)"
                 >
+                  <mat-option value="0"></mat-option>
                   <mat-option value="D/C">D/C</mat-option>
                   <mat-option value="Voiding Trial">Voiding Trial</mat-option>
                   <mat-option value="Keep">Keep</mat-option>
@@ -678,8 +699,8 @@
                   color="secondary"
                   [(ngModel)]="patientDetails.postop"
                   name="postop"
-                  (ngModelChange)="onbAntiboiticsChange($event)"
                 >
+                  <mat-option value="0"></mat-option>
                   <mat-option value="Y"> Yes</mat-option>
                   <mat-option value="N"> No</mat-option>
                 </mat-select>
@@ -687,10 +708,10 @@
             </div>
           </div>
           <hr class="mt-2 mb-3" />
-          <div class="row col-md-12 p0 mx-0">
+          <div class="row col-md-12 p0 mx-0" *ngIf="!patientDetails.admitDate">
             <hr />
             <div class="col-md-12 mb-1">
-              <h5 class="text-info">
+              <h5 class="text-secondary">
                 Appointment
                 <mat-hint
                   class="hintFont"
@@ -750,6 +771,11 @@
           </div>
 
           <div class="col-12">
+            <div class="col-md-12 mb-1 mx-0 p-0">
+              <h4 class="text-info">
+                Pertinent Info:<span class="text-danger">*</span>
+              </h4>
+            </div>
             <mat-form-field appearance="outline" class="example-full-width">
               <mat-label>Pertinent Info</mat-label>
               <textarea matInput [(ngModel)]="patientDetails.desc"> </textarea>
