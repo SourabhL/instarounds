@@ -24,6 +24,7 @@ const routes: Routes = [
   { path: "forgotpassword", component: ForgotPasswordComponent },
   { path: "addgynpatients", component: AddgynpatientsComponent },
   { path: "addobpatient", component: AddobpatientComponent },
+  { path: "addupdatepatient", component: AddobpatientComponent },
   {
     path: "addschedulerappointment",
     component: AddschedulerappointmentComponent,

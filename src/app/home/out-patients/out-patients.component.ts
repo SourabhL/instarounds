@@ -215,25 +215,32 @@ export class OutPatientsComponent implements OnInit {
     this.router.navigateByUrl("/ob-patients");
   }
 
+  goToPatients() {
+    this.router.navigateByUrl("/ob-patients");
+  }
+
   goToAddPatient() {
     const navigationExtras: NavigationExtras = {
       state: {
         patientType: "add",
         patientDetails: "",
+        patientStatus: "discharged",
       },
     };
-    this.router.navigate(["addobpatient"], navigationExtras);
+    this.router.navigate(["addupdatepatient"], navigationExtras);
   }
-
+  goToAnlyticsPage() {
+    this.router.navigateByUrl("/anlytics");
+  }
   goToUpdatePatient(item: any) {
-    console.log(item);
     const navigationExtras: NavigationExtras = {
       state: {
         patientType: "update",
         patientDetails: item,
+        patientStatus: "discharged",
       },
     };
-    this.router.navigate(["addobpatient"], navigationExtras);
+    this.router.navigate(["addupdatepatient"], navigationExtras);
   }
 
   goToLoginScreen() {

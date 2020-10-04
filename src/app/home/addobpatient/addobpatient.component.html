@@ -279,9 +279,13 @@
                     class="example-full-width"
                   >
                     <mat-label>C-Section Reason</mat-label>
+
                     <mat-select
                       color="secondary"
-                      [(ngModel)]="patientDetails.csecReason"
+                      multiple
+                      placeholder="C-Section Reason"
+                      [(ngModel)]="selectedCSectionReason"
+                      (ngModelChange)="onCSectionReasonChange($event)"
                     >
                       <mat-option
                         *ngFor="let reason of csectionReasonList"
@@ -292,7 +296,7 @@
                     </mat-select>
                   </mat-form-field>
                 </div>
-                <div class="col-md-3" *ngIf="patientDetails.csecReason === 13">
+                <div class="col-md-3" *ngIf="isCSectionOthrReason">
                   <mat-form-field
                     class="example-full-width"
                     appearance="outline"
@@ -300,11 +304,13 @@
                     <mat-label>Other C-Section Reason</mat-label>
                     <input
                       matInput
-                      [(ngModel)]="patientDetails.babyOtherInfo"
+                      [(ngModel)]="patientDetails.cSectionReasonOther"
                     />
                   </mat-form-field>
                 </div>
-                <div class="col-md-4">
+              </div>
+              <div class="row col-md-12 mt-2 mb-1 p0 mx-0">
+                <div class="col-md-8 p0">
                   <div class="col-md-12 mb-1">
                     <h5 class="text-secondary">Mode:</h5>
                   </div>
@@ -324,6 +330,7 @@
                   </div>
                 </div>
               </div>
+
               <div class="col-md-4 inducedReason">
                 <div class="col-md-4 mt-2 mb-1 p0">
                   <h5 class="text-secondary">Induced:</h5>
@@ -341,7 +348,7 @@
               </div>
               <div class="col-md-8 p0">
                 <div
-                  class="col-md-12 mt-3 mb-2"
+                  class="col-md-12"
                   *ngIf="patientDetails.induced === 'true'"
                 >
                   <div class="col-md-12">
@@ -708,7 +715,7 @@
             </div>
           </div>
           <hr class="mt-2 mb-3" />
-          <div class="row col-md-12 p0 mx-0" *ngIf="!patientDetails.admitDate">
+          <div class="row col-md-12 p0 mx-0">
             <hr />
             <div class="col-md-12 mb-1">
               <h5 class="text-secondary">
@@ -728,14 +735,14 @@
                 <mat-label>Start Time </mat-label>
                 <input
                   matInput
-                  [matDatepicker]="appointmentStartTime"
+                  type="datetime-local"
                   [(ngModel)]="patientDetails.appointmentStartTime"
                 />
 
-                <mat-datepicker-toggle
+                <!-- <mat-datepicker-toggle
                   matSuffix
                   [for]="appointmentStartTime"
-                ></mat-datepicker-toggle>
+                ></mat-datepicker-toggle> -->
                 <mat-datepicker #appointmentStartTime></mat-datepicker>
               </mat-form-field>
             </div>
@@ -744,14 +751,14 @@
                 <mat-label>End Time </mat-label>
                 <input
                   matInput
-                  [matDatepicker]="appointmentEndTime"
+                  type="datetime-local"
                   [(ngModel)]="patientDetails.appointmentEndTime"
                 />
 
-                <mat-datepicker-toggle
+                <!-- <mat-datepicker-toggle
                   matSuffix
                   [for]="appointmentEndTime"
-                ></mat-datepicker-toggle>
+                ></mat-datepicker-toggle> -->
                 <mat-datepicker #appointmentEndTime></mat-datepicker>
               </mat-form-field>
             </div>
@@ -771,16 +778,43 @@
           </div>
 
           <div class="col-12">
-            <div class="col-md-12 mb-1 mx-0 p-0">
+            <div class="col-md-12 mb-2 mx-0 p-0">
               <h4 class="text-info">
                 Pertinent Info:<span class="text-danger">*</span>
               </h4>
             </div>
+            <div class="col-md-12 mt-3 mb-3 mx-0 p-0">
+              <mat-accordion multi>
+                <mat-expansion-panel
+                  *ngFor="
+                    let info of patientPertinentInfoList | keyvalue;
+                    index as index
+                  "
+                >
+                  <mat-expansion-panel-header color="primary">
+                    <mat-panel-title> Day {{ index + 1 }} </mat-panel-title>
+                    <mat-panel-description>
+                      {{ info.key }}
+                    </mat-panel-description>
+                  </mat-expansion-panel-header>
+
+                  <p
+                    *ngFor="let dayDesc of info.value | keyvalue"
+                    class="grid5"
+                  >
+                    {{ dayDesc.value.mstUsers.firstName }} :
+                    {{ dayDesc.value.pertinentInfo }} -
+                    {{ dayDesc.value.updatedDate }}
+                  </p>
+                </mat-expansion-panel>
+              </mat-accordion>
+            </div>
             <mat-form-field appearance="outline" class="example-full-width">
-              <mat-label>Pertinent Info</mat-label>
+              <mat-label>Add Pertinent Info</mat-label>
               <textarea matInput [(ngModel)]="patientDetails.desc"> </textarea>
             </mat-form-field>
           </div>
+
           <div class="row col-md-12 mx-0 actionButtonsWrapper">
             <button
               mat-raised-button

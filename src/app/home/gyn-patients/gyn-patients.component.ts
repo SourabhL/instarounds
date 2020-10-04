@@ -30,6 +30,7 @@ export interface GynPatientsData {
 })
 export class GynPatientsComponent implements OnInit {
   @Input() gynPatientsList: [];
+  @Input() patientStatus: "";
   @Output() openDialog = new EventEmitter<any>();
 
   tempPatientsList = [];
@@ -143,24 +144,27 @@ export class GynPatientsComponent implements OnInit {
   viewPatientDetails() {}
 
   goToAddPatient() {
+    console.log(this.patientStatus);
     const navigationExtras: NavigationExtras = {
       state: {
         patientType: "add",
         patientDetails: "",
+        patientStatus: this.patientStatus,
       },
     };
-    this.router.navigate(["addgynpatients"], navigationExtras);
+    this.router.navigate(["addupdatepatient"], navigationExtras);
   }
 
   goToUpdatePatient(item: any) {
-    console.log(item);
+    console.log("goToUpdatePatient......", this.patientStatus);
     const navigationExtras: NavigationExtras = {
       state: {
         patientType: "update",
         patientDetails: item,
+        patientStatus: this.patientStatus,
       },
     };
-    this.router.navigate(["addobpatient"], navigationExtras);
+    this.router.navigate(["addupdatepatient"], navigationExtras);
   }
 
   goToLoginScreen() {

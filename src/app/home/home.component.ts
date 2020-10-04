@@ -1,27 +1,25 @@
-import {Component, OnInit} from '@angular/core';
-import {NavigationExtras, Router} from '@angular/router';
-import {first} from 'rxjs/operators';
-import {HomeService} from '../services/home.service';
+import { Component, OnInit } from "@angular/core";
+import { NavigationExtras, Router } from "@angular/router";
+import { first } from "rxjs/operators";
+import { HomeService } from "../services/home.service";
 
 declare var moment: any;
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss']
+  selector: "app-home",
+  templateUrl: "./home.component.html",
+  styleUrls: ["./home.component.scss"],
 })
 export class HomeComponent implements OnInit {
   plotDetailsmonth: any;
   plotDetailsyear: any;
   plotDetailsdate: any;
-  constructor(private router: Router, private homeService: HomeService, ) {
-
-  }
+  constructor(private router: Router, private homeService: HomeService) {}
 
   ngOnInit(): void {
-    this.getPieDataAnalytics('month');
-    this.getPieDataAnalytics('year');
-    this.getPieDataAnalytics('date');
+    this.getPieDataAnalytics("month");
+    this.getPieDataAnalytics("year");
+    this.getPieDataAnalytics("date");
   }
 
   // getPatientCounts() {
@@ -81,64 +79,70 @@ export class HomeComponent implements OnInit {
   // }
   //
   patientsTypeSelection() {
-    this.router.navigateByUrl('/ob-patients');
+    this.router.navigateByUrl("/ob-patients");
   }
 
+  goToPatients() {
+    this.router.navigateByUrl("/ob-patients");
+  }
 
   goToSchedulerPage() {
-    this.router.navigateByUrl('/scheduler');
+    this.router.navigateByUrl("/scheduler");
   }
 
   goToLoginScreen() {
-    localStorage.setItem('deviceToken', '');
-    localStorage.setItem('userData', '');
-    localStorage.setItem('deviceId', '');
-    this.router.navigateByUrl('/login');
+    localStorage.setItem("deviceToken", "");
+    localStorage.setItem("userData", "");
+    localStorage.setItem("deviceId", "");
+    this.router.navigateByUrl("/login");
   }
 
   goToAnlyticsPage() {
-    this.router.navigateByUrl('/anlytics');
+    this.router.navigateByUrl("/anlytics");
   }
 
   gotoDashboard() {
-    this.router.navigateByUrl('/home');
+    this.router.navigateByUrl("/home");
   }
 
   getPieDataAnalytics(setPeriod) {
     const payload = {
-      "token": localStorage.getItem('deviceToken'),
-      "fromDate": "2012/01/06",
-      "toDate": "2020/07/04",
-      "byYrMn": setPeriod,
-      "statType": "avg",
-      "patientTypeId": "1",
-      "admissionStatus": "IN",
-      "hospitalID": "",
-      "gbs": "",
-      "procedureTypesId": "",
-      "inducedReason": "",
-      "babyInfo": "",
-      "babyGender": "",
-      "apgar": "",
-      "liveBirth": "",
-      "csecReason": "",
-      "chartType": "pie"
-    }
-    this.homeService.fetchAnlyticsData(payload).pipe(first()).subscribe((data: any) => {
-      console.log(data.data);
-      // this.appService.hideLoader();
-      if (data && data.data.status) {
-        this.setPeriodData(data.data, setPeriod);
-      }  else {
-        // this.appService.alert('!Error', data.message);
-      }
-    });
+      token: localStorage.getItem("deviceToken"),
+      fromDate: "2012/01/06",
+      toDate: "2020/07/04",
+      byYrMn: setPeriod,
+      statType: "avg",
+      patientTypeId: "1",
+      admissionStatus: "IN",
+      hospitalID: "",
+      gbs: "",
+      procedureTypesId: "",
+      inducedReason: "",
+      babyInfo: "",
+      babyGender: "",
+      apgar: "",
+      liveBirth: "",
+      csecReason: "",
+      chartType: "pie",
+    };
+    this.homeService
+      .fetchAnlyticsData(payload)
+      .pipe(first())
+      .subscribe((data: any) => {
+        console.log(data.data);
+        // this.appService.hideLoader();
+        if (data && data.data.status) {
+          this.setPeriodData(data.data, setPeriod);
+        } else {
+          // this.appService.alert('!Error', data.message);
+        }
+      });
   }
 
   setPeriodData(data, period) {
-    if (period === 'month') {
+    if (period === "month") {
       this.plotDetailsmonth = data;
-    } else if (period === 'year') {
+    } else if (period === "year") {
       this.plotDetailsyear = data;
     } else {
       this.plotDetailsdate = data;

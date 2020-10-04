@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, ViewChild } from "@angular/core";
 import { HomeService } from "../../services/home.service";
 import { NotificationService } from "../../notification/notification.service";
 import { ActivatedRoute, Router, NavigationExtras } from "@angular/router";
@@ -34,6 +34,7 @@ export class AddobpatientComponent {
     induced: "",
     inducedReason: "",
     inducedReasonOthers: "",
+    cSectionReasonOther: "",
     //Baby Info
     babyInfo: "",
     babyOtherInfo: "",
@@ -77,7 +78,10 @@ export class AddobpatientComponent {
 
   selectedOBProcedure: any;
   selectedGYNProcedure = [];
+  selectedCSectionReason = [];
+  patientPertinentInfoList = [];
   patientType: any; // add or update
+  patientStatus: any; //census or discharged
   gsDays: any;
   gsWeeks: any;
   gspsg = "";
@@ -89,6 +93,8 @@ export class AddobpatientComponent {
   update = false;
   updatePatient: any;
 
+  isCSectionOthrReason = false;
+  panelOpenState = false;
   lmpMaxDate: any;
   postPartumMinDate: any;
   postPartumMaxDate: any;
@@ -127,12 +133,16 @@ export class AddobpatientComponent {
 
     // *** Get Details from Route queryParams - for Update ***
     this.route.queryParams.subscribe((params) => {
-      if (this.router.getCurrentNavigation().extras.state) {
-        this.patientType = this.router.getCurrentNavigation().extras.state.patientType;
-        this.updatePatient = this.router.getCurrentNavigation().extras.state.patientDetails;
-        this.patientDetails.patientTypeId = this.updatePatient.patientTypes.id.toString();
+      //patientStatus
 
-        console.log(this.updatePatient);
+      if (this.router.getCurrentNavigation().extras.state) {
+        console.log(this.router.getCurrentNavigation().extras.state);
+        this.patientType = this.router.getCurrentNavigation().extras.state.patientType;
+        this.patientStatus = this.router.getCurrentNavigation().extras.state.patientStatus;
+        this.updatePatient = this.router.getCurrentNavigation().extras.state.patientDetails;
+        if (this.updatePatient.patientTypes) {
+          this.patientDetails.patientTypeId = this.updatePatient.patientTypes.id.toString();
+        }
       }
     });
 
@@ -154,7 +164,9 @@ export class AddobpatientComponent {
     this.router.navigateByUrl("/home");
   }
   patientsTypeSelection() {
-    this.router.navigateByUrl("/ob-patients");
+    if (this.patientStatus && this.patientStatus === "discharged")
+      this.router.navigateByUrl("/out-patients");
+    else this.router.navigateByUrl("/ob-patients");
   }
   goToOutPatient() {
     this.router.navigateByUrl("/out-patients");
@@ -362,6 +374,19 @@ export class AddobpatientComponent {
     this.patientDetails.postpartumDay = diffDays;
   }
 
+  // *** C-Section Reason Change ***
+  onCSectionReasonChange(value: any) {
+    console.log(this.selectedCSectionReason, value);
+    this.isCSectionOthrReason = value[value.length - 1] === 13;
+    this.patientDetails.csecReason = Array.isArray(value)
+      ? value.length
+        ? value.join(",")
+        : ""
+      : value;
+
+    console.log(this.patientDetails.csecReason);
+  }
+
   // **** Gestational Weeks & Days Change ****
   updateDatesOnWeeksChange() {
     const todaysDate = moment(new Date());
@@ -485,6 +510,10 @@ export class AddobpatientComponent {
       }
     }
 
+    this.patientDetails.surgeryDate = moment(
+      this.patientDetails.surgeryDate
+    ).format("MM-DD-YYYY");
+
     console.log(this.patientDetails);
   }
 
@@ -559,7 +588,8 @@ export class AddobpatientComponent {
         if (data) {
           this.appService.success("Success", "OB Patient Add Successfully.");
           if (this.patientType === "add" || this.patientType === "update") {
-            this.router.navigateByUrl("/ob-patients");
+            //this.router.navigateByUrl("/ob-patients");
+            this.patientsTypeSelection();
           } else {
             this.router.navigateByUrl("addschedulerappointment");
           }
@@ -593,7 +623,8 @@ export class AddobpatientComponent {
         if (data) {
           this.appService.success("Success", "OB Patient Update Successfully.");
           if (this.patientType === "add" || this.patientType === "update") {
-            this.router.navigateByUrl("/ob-patients");
+            //this.router.navigateByUrl("/ob-patients");
+            this.patientsTypeSelection();
           } else {
             this.router.navigateByUrl("addschedulerappointment");
           }
@@ -704,26 +735,41 @@ export class AddobpatientComponent {
       this.patientDetails.gbs = this.updatePatient.gbs;
     }
 
-    if (
-      this.updatePatient.pcrList === null ||
-      this.updatePatient.pcrList.length === 0
-    ) {
-      this.patientDetails.csecReason = "";
-    } else {
-      this.patientDetails.csecReason = this.updatePatient.pcrList[0].csReason.id.toString();
-    }
+    // ********* C-Section **************
 
-    if (this.updatePatient.daysList && this.updatePatient.daysList.length) {
-      this.updatePatient.daysList.forEach((info) => {
-        const data = {
-          expanded: false,
-          arrowicon: "arrow-dropright-circle",
-          date: info,
-        };
-        //this.infoList.push(data);
+    if (this.updatePatient.pcrList && this.updatePatient.pcrList.length) {
+      this.updatePatient.pcrList.forEach((proce, index) => {
+        this.selectedCSectionReason.push(proce.csReason.id);
+        if (index === 0) {
+          this.patientDetails.csecReason = proce.csReason.id.toString();
+        } else {
+          this.patientDetails.csecReason =
+            this.patientDetails.csecReason + "," + proce.csReason.id.toString();
+        }
       });
     }
 
+    if (
+      this.updatePatient.patientProceduresList &&
+      this.updatePatient.patientProceduresList.length
+    ) {
+      this.updatePatient.patientProceduresList.forEach((proce, index) => {
+        this.selectedGYNProcedure.push(proce.procedureTypes.id);
+        if (index === 0) {
+          this.selectedOBProcedure = proce.procedureTypes.id;
+          this.patientDetails.procedureTypesId = proce.procedureTypes.id.toString();
+        } else {
+          this.patientDetails.procedureTypesId =
+            this.patientDetails.procedureTypesId +
+            "," +
+            proce.procedureTypes.id.toString();
+        }
+      });
+    }
+
+    // *** Mode ***
+    console.log(this.cpModeList);
+    console.log(this.updatePatient.pcpmList);
     if (this.updatePatient.pcpmList && this.updatePatient.pcpmList.length > 0) {
       this.updatePatient.pcpmList.forEach((proce) => {
         this.cpModeList.forEach((mode) => {
@@ -734,6 +780,7 @@ export class AddobpatientComponent {
       });
     }
 
+    // **** Induced Reason ****
     if (this.updatePatient.pirList && this.updatePatient.pirList.length > 0) {
       this.updatePatient.pirList.forEach((pir) => {
         this.inReason.forEach((resion) => {
@@ -748,6 +795,7 @@ export class AddobpatientComponent {
       });
     }
 
+    // **** GTPAL ****
     if (this.updatePatient.gsPs === null || this.updatePatient.gsPs === "") {
       this.patientDetails.gsps = "";
     } else {
@@ -876,5 +924,15 @@ export class AddobpatientComponent {
 
     // *** postOpAntibiotics ***
     this.patientDetails.postop = this.updatePatient.postOpAntibiotics;
+    console.log(this.updatePatient.patientPertinentInfoList);
+
+    // ********* Appointment Dates *******************
+    this.patientDetails.appointmentStartTime = this.updatePatient.appointmentDate;
+
+    // ********* Pertinent Info *******************
+    this.patientPertinentInfoList =
+      (this.updatePatient.patientPertinentInfoList &&
+        this.updatePatient.patientPertinentInfoList[0]) ||
+      [];
   }
 }

@@ -65,8 +65,7 @@ export class ObPatientsComponent implements OnInit {
     );
 
     dialogRef.afterClosed().subscribe((data) => {
-      console.log("Dialog output:", data);
-      if (data.id) {
+      if (data && data.id) {
         this.DischargePatient(data);
       }
     });
@@ -168,6 +167,10 @@ export class ObPatientsComponent implements OnInit {
   patientsTypeSelection() {
     this.router.navigateByUrl("/ob-patients");
   }
+  goToPatients() {
+    this.router.navigateByUrl("/ob-patients");
+  }
+
   goToOutPatient() {
     this.router.navigateByUrl("/out-patients");
   }
@@ -176,9 +179,10 @@ export class ObPatientsComponent implements OnInit {
       state: {
         patientType: "add",
         patientDetails: "",
+        patientStatus: "census",
       },
     };
-    this.router.navigateByUrl("/addobpatient", navigationExtras);
+    this.router.navigateByUrl("/addupdatepatient", navigationExtras);
   }
   goToAnlyticsPage() {
     this.router.navigateByUrl("/anlytics");
@@ -190,9 +194,10 @@ export class ObPatientsComponent implements OnInit {
       state: {
         patientType: "update",
         patientDetails: item,
+        patientStatus: "census",
       },
     };
-    this.router.navigate(["addobpatient"], navigationExtras);
+    this.router.navigate(["addupdatepatient"], navigationExtras);
   }
 
   goToLoginScreen() {

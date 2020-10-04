@@ -9,10 +9,7 @@
         <a href="javascript:void(0)" (click)="gotoDashboardPage()">Dashboard</a>
       </li>
       <li>
-        <a
-          href="javascript:void(0)"
-          class="active"
-          (click)="patientsTypeSelection()"
+        <a href="javascript:void(0)" class="active" (click)="goToPatients()"
           >Patients</a
         >
       </li>
@@ -32,7 +29,7 @@
 <section class="row ob-patients-block mx-0 px-4">
   <div class="row col-md-12 mx-0 p0 mt-2">
     <div class="row col-md-5 mx-0 p0 mt-2">
-      <h3>Discharged Patients</h3>
+      <h3 class="text-info">Discharged Patients</h3>
     </div>
     <div class="col-md-7 col-sm-12 col-xs-12 p0">
       <ul class="custom-breadcrumb pull-right">
@@ -116,7 +113,9 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>Actions</th>
           <td mat-cell *matCellDef="let row">
-            <a routerLink="/your-link"> view/edit</a>
+            <a (click)="goToUpdatePatient(row)" href="javascript:;">
+              view/edit</a
+            >
           </td>
         </ng-container>
 
@@ -162,6 +161,7 @@
   <div *ngIf="gynPatientsList.length" class="row col-md-12 mx-0 p0 mt-4 mb-5">
     <app-gyn-patients
       [gynPatientsList]="gynPatientsList"
+      patientStatus="discharged"
       (openDialog)="openDialog($event)"
       class="row col-md-12 mx-0 p0"
     ></app-gyn-patients>
