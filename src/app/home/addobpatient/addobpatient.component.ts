@@ -1,8 +1,10 @@
-import { Component, ViewChild } from "@angular/core";
+import { Component } from "@angular/core";
 import { HomeService } from "../../services/home.service";
 import { NotificationService } from "../../notification/notification.service";
 import { ActivatedRoute, Router, NavigationExtras } from "@angular/router";
-
+import { BehaviorSubject } from "rxjs/internal/BehaviorSubject";
+import { Observable } from "rxjs";
+import { DataSource } from "@angular/cdk/collections";
 declare var moment: any;
 
 @Component({
@@ -34,7 +36,7 @@ export class AddobpatientComponent {
     induced: "",
     inducedReason: "",
     inducedReasonOthers: "",
-    cSectionReasonOther: "",
+    csectionReasonOther: "",
     //Baby Info
     babyInfo: "",
     babyOtherInfo: "",
@@ -90,10 +92,10 @@ export class AddobpatientComponent {
   gspsa = "";
   gspsl = "";
 
-  update = false;
   updatePatient: any;
 
   isCSectionOthrReason = false;
+  isOtherInducedReason = false;
   panelOpenState = false;
   lmpMaxDate: any;
   postPartumMinDate: any;
@@ -101,6 +103,9 @@ export class AddobpatientComponent {
   admitMinDate: any;
   admitMaxDate: any;
   dateOfSurgeryMinDate: any;
+
+  displayedColumns = ["firstName", "updatedDate", "pertinentInfo"];
+  dataSource = new ExampleDataSource(this.patientPertinentInfoList);
 
   constructor(
     private homeService: HomeService,
@@ -149,9 +154,7 @@ export class AddobpatientComponent {
     // *** Fill Details in the Form - for patient to update ***
     if (this.patientType === "update") {
       this.fillEditPatientFormDetails();
-      this.update = true;
     }
-
     // *** Set Options List in Dropdowns ***
     this.gsWeeksList = Array.from({ length: 43 }, (v, k) => k.toString());
     this.gsDaysList = Array.from({ length: 7 }, (v, k) => k.toString());
@@ -159,6 +162,32 @@ export class AddobpatientComponent {
     this.getHospitals();
   }
 
+  update(el: any, pertinentInfo: string) {
+    console.log(el);
+    console.log("pertinentInfo...", pertinentInfo);
+    if (pertinentInfo == null) {
+      return;
+    }
+
+    const pertinentInfoUpdate = {
+      token: localStorage.getItem("deviceToken"),
+      pertinentInfo: pertinentInfo,
+      patientPertinentInfoId: el.patientPertinentInfoId,
+    };
+
+    // Update Details
+    this.homeService
+      .updatePatientPertinentInfo(pertinentInfoUpdate)
+      .subscribe((data) => {
+        console.log(data);
+      });
+
+    // copy and mutate
+    const copy = this.dataSource.data().slice();
+    console.log(copy);
+    el.pertinentInfo = pertinentInfo;
+    this.dataSource.update(copy);
+  }
   // ************ Page Navigation ************
   gotoDashboardPage() {
     this.router.navigateByUrl("/home");
@@ -236,21 +265,34 @@ export class AddobpatientComponent {
               updatedDate: item.updatedDate,
             };
           });
-          //this.patientDetails.procedureTypesId = "";
+
           // *** C-Section - Reason List ***
           this.csectionReasonList = data.data.csectionReasonList;
 
           // *** C-Section - Mode  ***
+          const selectedModeArray = this.cpModeList.map((mode) => mode.id);
           this.cpModeList = data.data.cpModeList.map((item) => ({
             ...item,
-            isChecked: false,
+            isChecked:
+              selectedModeArray.length && selectedModeArray.includes(item.id)
+                ? true
+                : false,
           }));
+          this.handleModeChange();
 
+          const selectedInducedReasonArray = this.inReason.map(
+            (reason) => reason.id
+          );
           // *** Induced Reason  ***
           this.inReason = data.data.inReason.map((item) => ({
             ...item,
-            isChecked: false,
+            isChecked:
+              selectedInducedReasonArray.length &&
+              selectedInducedReasonArray.includes(item.id)
+                ? true
+                : false,
           }));
+          this.handleInducedReasonChange();
         } else {
           this.appService.alert("!Error", data.message);
         }
@@ -266,6 +308,7 @@ export class AddobpatientComponent {
 
   // *** OB - C-Section Mode Change ***
   handleModeChange() {
+    console.log(this.cpModeList);
     this.patientDetails.mode = this.cpModeList
       .filter((val) => val.isChecked)
       .map((val) => val.id)
@@ -276,12 +319,21 @@ export class AddobpatientComponent {
   handleInducedReasonChange() {
     this.patientDetails.inducedReason = this.inReason
       .filter((val) => val.isChecked)
-      .map((val) => val.id)
+      .map((val) => {
+        return val.id;
+      })
       .join(",");
-  }
+    var isOtherInInduced = this.patientDetails.inducedReason.split(",").pop();
+    if (isOtherInInduced === "7") {
+      this.isOtherInducedReason = true;
+    } else {
+      this.isOtherInducedReason = false;
+    }
 
-  onEblChange(value) {
-    console.log(value);
+    // if(this.inReason)
+    // this.isOtherInducedReason = true;
+    console.log(this.inReason);
+    console.log(this.patientDetails.inducedReason);
   }
 
   // *** Patient Type ***
@@ -457,9 +509,11 @@ export class AddobpatientComponent {
     this.patientDetails.birthWeight = this.patientDetails.birthWeight.toString();
     this.patientDetails.procedureTypesId = this.patientDetails.procedureTypesId.toString();
     if (this.patientType === "add" || this.patientType === "update") {
-      this.patientDetails.admitDate = moment(
-        this.patientDetails.admitDate
-      ).format("MM-DD-YYYY");
+      if (this.patientDetails.admitDate) {
+        this.patientDetails.admitDate = moment(
+          this.patientDetails.admitDate
+        ).format("MM-DD-YYYY");
+      }
     } else {
       this.patientDetails.admitDate = "";
     }
@@ -509,11 +563,11 @@ export class AddobpatientComponent {
         this.patientDetails.babyInfo = "";
       }
     }
-
-    this.patientDetails.surgeryDate = moment(
-      this.patientDetails.surgeryDate
-    ).format("MM-DD-YYYY");
-
+    if (this.patientDetails.surgeryDate) {
+      this.patientDetails.surgeryDate = moment(
+        this.patientDetails.surgeryDate
+      ).format("MM-DD-YYYY");
+    }
     console.log(this.patientDetails);
   }
 
@@ -551,8 +605,15 @@ export class AddobpatientComponent {
       this.appService.warning("!Warning", "Please select Hospital");
     } else if (this.patientDetails.procedureTypesId === "") {
       this.appService.warning("!Warning", "Please select Procedure");
-    } else if (this.patientDetails.admitDate === "") {
-      this.appService.warning("!Warning", "Please Fill Date Of Admit.");
+    } else if (
+      this.patientDetails.admitDate === "" &&
+      this.patientDetails.appointmentStartTime === "" &&
+      this.patientDetails.appointmentEndTime === ""
+    ) {
+      this.appService.warning(
+        "!Warning",
+        "Please Fill Date Of Admit or Appointment Date."
+      );
     } else if (this.patientDetails.desc === "") {
       this.appService.warning("!Warning", "Please enter Pertinent Info");
     } else {
@@ -746,6 +807,11 @@ export class AddobpatientComponent {
           this.patientDetails.csecReason =
             this.patientDetails.csecReason + "," + proce.csReason.id.toString();
         }
+        console.log("proce.csReason.reason..", proce.csReason.reason);
+        if (proce.csReason.reason === "Other") {
+          this.patientDetails.csectionReasonOther = proce.csectionReasonOther;
+          this.isCSectionOthrReason = true;
+        }
       });
     }
 
@@ -768,31 +834,34 @@ export class AddobpatientComponent {
     }
 
     // *** Mode ***
-    console.log(this.cpModeList);
+
     console.log(this.updatePatient.pcpmList);
     if (this.updatePatient.pcpmList && this.updatePatient.pcpmList.length > 0) {
-      this.updatePatient.pcpmList.forEach((proce) => {
-        this.cpModeList.forEach((mode) => {
-          if (proce.cpMode.id === mode.id) {
-            mode.isChecked = true;
-          }
-        });
-      });
+      this.cpModeList = this.updatePatient.pcpmList.map((mode) => mode.cpMode);
     }
+    console.log(this.updatePatient.pirList);
 
     // **** Induced Reason ****
     if (this.updatePatient.pirList && this.updatePatient.pirList.length > 0) {
-      this.updatePatient.pirList.forEach((pir) => {
-        this.inReason.forEach((resion) => {
-          if (pir.ir.id === resion.id) {
-            resion.isChecked = true;
-          }
-          if (pir.ir.irName === "Other") {
-            //this.reasonInducedType = pir.ir.irName;
-            this.patientDetails.inducedReasonOthers = pir.inducedReasonOthers;
-          }
-        });
+      this.inReason = this.updatePatient.pirList.map((reason) => {
+        if (reason.ir.irName === "Other") {
+          this.patientDetails.inducedReasonOthers = reason.inducedReasonOthers;
+          this.isOtherInducedReason = true;
+        }
+        return reason.ir;
       });
+
+      // this.updatePatient.pirList.forEach((pir) => {
+      //   // this.inReason.forEach((resion) => {
+      //   //   if (pir.ir.id === resion.id) {
+      //   //     resion.isChecked = true;
+      //   //   }
+      //   //   if (pir.ir.irName === "Other") {
+      //   //     //this.reasonInducedType = pir.ir.irName;
+      //   //     this.patientDetails.inducedReasonOthers = pir.inducedReasonOthers;
+      //   //   }
+      //   // });
+      // });
     }
 
     // **** GTPAL ****
@@ -935,4 +1004,35 @@ export class AddobpatientComponent {
         this.updatePatient.patientPertinentInfoList[0]) ||
       [];
   }
+}
+export interface Element {
+  firstName: string;
+  updatedDate: string;
+  pertinentInfo?: string;
+}
+
+export class ExampleDataSource extends DataSource<any> {
+  private dataSubject = new BehaviorSubject<Element[]>([]);
+
+  data() {
+    console.log(this.dataSubject);
+    return this.dataSubject.value;
+  }
+
+  update(data) {
+    console.log(data);
+    this.dataSubject.next(data);
+  }
+
+  constructor(data: any[]) {
+    super();
+    this.dataSubject.next(data);
+  }
+
+  /** Connect function called by the table to retrieve one stream containing the data to render. */
+  connect(): Observable<Element[]> {
+    return this.dataSubject;
+  }
+
+  disconnect() {}
 }

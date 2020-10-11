@@ -134,6 +134,7 @@ export class OutPatientsComponent implements OnInit {
           this.dataSource = new MatTableDataSource(this.obPatientsList);
           this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
+          console.log("dataSource", this.dataSource.data.length);
           this.obPatientsList.forEach((item: any) => {
             item.avatar = item.mstUsers.firstName.substring(0, 1);
             item.color = this.appService.getRandomColor();

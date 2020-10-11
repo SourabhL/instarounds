@@ -99,6 +99,13 @@ export class HomeService {
     );
   }
 
+  updatePatientPertinentInfo(pertinentInfo: any) {
+    return this.http.put(
+      `${environment.api.baseUrl}patient/editPatientPertinentInfo`,
+      pertinentInfo
+    );
+  }
+
   submitAppoinmentDetails(endPoinr: any, patientData: any) {
     return this.http.put(
       `${environment.api.baseUrl}apt/patientAppointment}`,

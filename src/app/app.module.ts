@@ -13,6 +13,7 @@ import { AnlytiksComponent } from "./home/anlytiks/anlytiks.component";
 import { CsvDataService } from "./home/anlytiks/csv-data.service";
 import { MatDatepickerModule } from "@angular/material/datepicker";
 import { SatDatepickerModule } from "saturn-datepicker";
+import { SatPopoverModule } from "@ncstate/sat-popover";
 import { ChartsViewComponent } from "./home/charts-view/charts-view.component";
 import {
   MatGridListModule,
@@ -48,7 +49,7 @@ import { UserListComponent } from "./home/user-list/user-list.component";
 import { ForgotPasswordComponent } from "./forgot-password/forgot-password.component";
 import { NotificationListComponent } from "./notification/notification.component";
 import { NotificationService } from "./notification/notification.service";
-
+import { InlineEditComponent } from "./inline-edit/inline-edit.component";
 @NgModule({
   declarations: [
     AppComponent,
@@ -71,6 +72,7 @@ import { NotificationService } from "./notification/notification.service";
     NotificationListComponent,
     DialogContentExampleDialog,
     DialogContentOutDialog,
+    InlineEditComponent,
   ],
   imports: [
     BrowserModule,
@@ -92,11 +94,13 @@ import { NotificationService } from "./notification/notification.service";
     MatRadioModule,
     MatFormFieldModule,
     MatExpansionModule,
+    SatPopoverModule,
   ],
   entryComponents: [
     AppComponent,
     DialogContentExampleDialog,
     DialogContentOutDialog,
+    InlineEditComponent,
   ],
   providers: [CsvDataService, NotificationService],
   bootstrap: [AppComponent],
