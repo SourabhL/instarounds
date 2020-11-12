@@ -19,7 +19,7 @@ import {
   MatDialogRef,
   MatDialogConfig,
 } from "@angular/material/dialog";
-
+import { AlertDialogComponent } from "../alert-dialog/alert-dialog.component";
 declare var moment: any;
 export interface OutPatientsData {
   fullName: string;
@@ -45,7 +45,7 @@ export class OutPatientsComponent implements OnInit {
     "actions",
   ];
   dataSource: MatTableDataSource<OutPatientsData>;
-
+  loading = false;
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: false }) sort: MatSort;
 
@@ -70,7 +70,7 @@ export class OutPatientsComponent implements OnInit {
     const dialogRef = this.dialog.open(DialogContentOutDialog, dialogConfig);
     dialogRef.afterClosed().subscribe((data) => {
       console.log("Dialog output:", data);
-      if (data.id) {
+      if (data.patient_id) {
         this.reAdmitPatient(data);
       }
     });
@@ -88,6 +88,17 @@ export class OutPatientsComponent implements OnInit {
     // this.dataSource = new MatTableDataSource(this.patientsList);
   }
 
+  openMessageDialog(message) {
+    const dialogRef = this.dialog.open(AlertDialogComponent, {
+      data: {
+        message: message,
+        buttonText: {
+          cancel: "Ok",
+        },
+      },
+    });
+  }
+
   ngOnInit() {
     this.getPatients();
   }
@@ -97,54 +108,43 @@ export class OutPatientsComponent implements OnInit {
   getPatients() {
     this.obPatientsList = [];
     this.tempPatientsList = [];
-
-    // this.appService.showLoader();
+    this.loading = true;
     this.loginSer
-      .fetchOutPatients(environment.api.getOutPatients)
-      .subscribe((data: any) => {
-        console.log(data);
-        // this.appService.hideLoader();
-        if (data._statusCode === "200") {
-          console.log("data.data.patientsList...", data.data);
-          this.obPatientsList = data.data.patientDetails
-            .filter((val) => val.patientTypes.type == "OB")
+      .fetchPatients(environment.api.getPatientsNew, "out", 1)
+      .then((data: any) => {
+        console.log(data.status);
+        this.loading = false;
+        //this.appService.hideLoader();
+        if (data.status) {
+          console.log("data.data..", data.data);
+          this.obPatientsList = data.data
+            .filter((val) => val.patient_type_id === 1)
             .map((val) => ({
               ...val,
-              fullName: `${val.mstUsers.firstName} ${val.mstUsers.lastName}`,
+              fullName: `${val.first_name} ${val.last_name}`,
               edd: (val.edd && moment(val.edd).format("MM/DD/YYYY")) || val.edd,
-              dischargeDate:
-                (val.dischargeDate &&
-                  moment(val.dischargeDate).format("MM/DD/YYYY")) ||
-                val.edd,
+              discharge_date:
+                (val.discharge_date &&
+                  moment(val.discharge_date).format("MM/DD/YYYY")) ||
+                val.discharge_date,
+            }));
+          this.gynPatientsList = data.data
+            .filter((val) => val.patient_type_id === 2)
+            .map((val) => ({
+              ...val,
+              fullName: `${val.first_name} ${val.last_name}`,
             }));
 
-          this.gynPatientsList = data.data.patientDetails
-            .filter((val) => val.patientTypes.type == "GYN")
-            .map((val) => ({
-              ...val,
-              fullName: `${val.mstUsers.firstName} ${val.mstUsers.lastName}`,
-            }));
-          console.log("this.obPatientsList...", this.obPatientsList);
-          // this.obPatientsList = data.data.patientDetails;
-          // this.gynPatientsList = data.data.gynPatientsList;
-          // this.obPatientsList = data.data.obPatientsList.map((val) => ({
-          //   ...val,
-          //   fullName: `${val.mstUsers.firstName} ${val.mstUsers.lastName}`,
-          // }));
           this.dataSource = new MatTableDataSource(this.obPatientsList);
           this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
-          console.log("dataSource", this.dataSource.data.length);
-          this.obPatientsList.forEach((item: any) => {
-            item.avatar = item.mstUsers.firstName.substring(0, 1);
-            item.color = this.appService.getRandomColor();
-          });
-          this.tempPatientsList = this.obPatientsList;
+
+          console.log("obPatientsList..", this.obPatientsList);
+          console.log("gynPatientsList..", this.gynPatientsList);
         } else if (!data.status) {
-          console.log("go to login screen");
           this.goToLoginScreen();
         } else {
-          this.appService.error("!Error", data.message);
+          this.openMessageDialog("Error in Fetching Patients");
         }
       });
   }
@@ -166,26 +166,6 @@ export class OutPatientsComponent implements OnInit {
     }
   }
 
-  unAdmitPatient(item: any) {
-    const userdata = {
-      token: localStorage.getItem("deviceToken"),
-      patientDetailsId: item.mstUsers.userId,
-    };
-    // this.appService.showLoader();
-    this.loginSer.fetchUnAdimtPatient(userdata).subscribe((data: any) => {
-      console.log(data.data);
-      //this.appService.hideLoader();
-      if (data.status) {
-        this.getPatients();
-      } else if (!data.status) {
-        this.goToLoginScreen();
-      } else {
-        // this.appService.hideLoader();
-        this.appService.alert("!Error", data.message);
-      }
-    });
-  }
-
   DischargePatient(item: any) {
     const userdata = {
       token: localStorage.getItem("deviceToken"),
@@ -202,6 +182,7 @@ export class OutPatientsComponent implements OnInit {
       } else {
         //  this.appService.hideLoader();
         this.appService.alert("!Error", data.message);
+        this.openMessageDialog("Error while Discharging Patient");
       }
     });
   }
@@ -253,24 +234,23 @@ export class OutPatientsComponent implements OnInit {
   reAdmitPatient(item: any) {
     console.log("Inside Parent reAdmitPatient");
     console.log(item);
-    const userdata = {
-      token: localStorage.getItem("deviceToken"),
-      patientDetailsId: item.id,
-    };
-    // this.appService.showLoader();
-    this.loginSer.fetchReAdmitPatient(userdata).subscribe((data: any) => {
-      console.log(data.data);
-      this.getPatients();
-      // this.appService.hideLoader();
-      // if (data.status) {
-      //   this.getPatients();
-      // } else if (!data.status) {
-      //   this.goToLoginScreen();
-      // } else {
-      //   //  this.appService.hideLoader();
-      //   this.appService.alert("!Error", data.message);
-      // }
-    });
+
+    this.loginSer
+      .reAdmitPatientNew({
+        admission_status: "IN",
+        patient_id: item.patient_id,
+      })
+      .then((data: any) => {
+        //this.appService.hideLoader();
+        if (data.status) {
+          this.openMessageDialog("Patient Re-admitted Successfully.");
+          this.getPatients();
+        } else {
+          // this.appService.hideLoader();
+          //this.appService.alert("!Error", data.message);
+          this.openMessageDialog("Error in Patient Re-admit.");
+        }
+      });
   }
 }
 @Component({

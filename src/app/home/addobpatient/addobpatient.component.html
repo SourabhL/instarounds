@@ -68,19 +68,19 @@
           <div class="col-md-4">
             <mat-form-field class="example-full-width" appearance="outline">
               <mat-label>First Name:</mat-label>
-              <input matInput [(ngModel)]="patientDetails.fname" />
+              <input matInput [(ngModel)]="patientDetails.first_name" />
             </mat-form-field>
           </div>
           <div class="col-md-4">
             <mat-form-field class="example-full-width" appearance="outline">
               <mat-label>Last Name:</mat-label>
-              <input matInput [(ngModel)]="patientDetails.lname" />
+              <input matInput [(ngModel)]="patientDetails.last_name" />
             </mat-form-field>
           </div>
           <div class="col-md-4">
             <mat-form-field class="example-full-width" appearance="outline">
               <mat-label>Room No:</mat-label>
-              <input matInput [(ngModel)]="patientDetails.roomNo" />
+              <input matInput [(ngModel)]="patientDetails.room_number" />
             </mat-form-field>
           </div>
 
@@ -88,13 +88,13 @@
             <mat-form-field appearance="outline" class="example-full-width">
               <mat-label>Hospital</mat-label>
               <mat-select
-                [(ngModel)]="patientDetails.hospitalID"
+                [(ngModel)]="patientDetails.hospital_id"
                 name="hospital"
                 (ngModelChange)="handleHospitalChange($event)"
               >
                 <mat-option
                   *ngFor="let hospital of hospitalList"
-                  [value]="hospital.id"
+                  [value]="hospital.hospital_id"
                 >
                   {{ hospital.name }}
                 </mat-option>
@@ -107,47 +107,50 @@
               <mat-label>Patient Type :</mat-label>
               <mat-select
                 color="secondary"
-                [(ngModel)]="patientDetails.patientTypeId"
+                [(ngModel)]="patientDetails.patient_type_id"
                 name="patientAddType"
                 (ngModelChange)="onPatientTypeChange()"
               >
-                <mat-option value="1"> OB</mat-option>
-                <mat-option value="2"> GYN</mat-option>
+                <mat-option value="1"> Obstetrics</mat-option>
+                <mat-option value="2"> Gynecology</mat-option>
               </mat-select>
             </mat-form-field>
           </div>
 
-          <div class="col-md-4">
+          <div class="col-md-4" *ngIf="patientDetails.patient_type_id === '1'">
             <mat-form-field appearance="outline" class="example-full-width">
               <mat-label>Procedure</mat-label>
               <mat-select
-                *ngIf="patientDetails.patientTypeId === '1'"
                 color="secondary"
-                [(ngModel)]="selectedOBProcedure"
+                [(ngModel)]="patientDetails.procedure_id"
                 (ngModelChange)="onProcedureChange($event)"
               >
                 <mat-option value="">Select Procedure</mat-option>
                 <mat-option
                   *ngFor="let procedure of procedureList"
-                  [value]="procedure.id || null"
+                  [value]="procedure.procedure_id || null"
                 >
-                  {{ procedure.procedureName }}</mat-option
+                  {{ procedure.procedure_name }}</mat-option
                 >
               </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-4" *ngIf="patientDetails.patient_type_id === '2'">
+            <mat-form-field appearance="outline" class="example-full-width">
+              <mat-label>Procedure</mat-label>
 
               <mat-select
                 color="secondary"
-                *ngIf="patientDetails.patientTypeId === '2'"
                 multiple
                 placeholder="Procedure"
-                [(ngModel)]="selectedGYNProcedure"
+                [(ngModel)]="patientDetails.procedure_id"
                 (ngModelChange)="onProcedureChange($event)"
               >
                 <mat-option
                   *ngFor="let procedure of procedureList"
-                  [value]="procedure.id"
+                  [value]="procedure.procedure_id"
                 >
-                  {{ procedure.procedureName }}</mat-option
+                  {{ procedure.procedure_name }}</mat-option
                 >
               </mat-select>
             </mat-form-field>
@@ -161,8 +164,7 @@
                   matInput
                   [readonly]="true"
                   [matDatepicker]="admitDate"
-                  [(ngModel)]="patientDetails.admitDate"
-                  (dateChange)="updateAdmitDate($event)"
+                  [(ngModel)]="patientDetails.admitted_date"
                   [min]="admitMinDate"
                   [max]="admitMaxDate"
                 />
@@ -188,7 +190,7 @@
           <div
             class="row col-md-12 p0 mx-0"
             type="OB"
-            *ngIf="patientDetails.patientTypeId === '1'"
+            *ngIf="patientDetails.patient_type_id === '1'"
           >
             <div class="col-md-12 mb-2">
               <h3 class="text-info">OB</h3>
@@ -196,7 +198,10 @@
             <!-- Other than Postpartum and C-Section-->
             <div
               class="row col-md-12 p0 mx-0"
-              *ngIf="selectedOBProcedure !== 3 && selectedOBProcedure !== 16"
+              *ngIf="
+                procedureName === 'Antepartum' ||
+                procedureName === 'Intrapartum'
+              "
             >
               <div class="col-md-4">
                 <mat-form-field appearance="outline" class="example-full-width">
@@ -206,6 +211,7 @@
                     [readonly]="true"
                     [matDatepicker]="lmp"
                     [(ngModel)]="patientDetails.lmp"
+                    min="2000-12-31"
                     [max]="lmpMaxDate"
                     (dateChange)="updateLmpDate($event)"
                   />
@@ -237,7 +243,7 @@
             <!-- For Procedure - PostPartum-->
             <div
               class="row col-md-12 p0 mx-0"
-              *ngIf="selectedOBProcedure === 3"
+              *ngIf="procedureName === 'Postpartum'"
             >
               <div class="col-md-4">
                 <mat-form-field appearance="outline" class="example-full-width">
@@ -245,9 +251,10 @@
                   <input
                     matInput
                     [matDatepicker]="postpartumDate"
-                    [(ngModel)]="patientDetails.postpartumDate"
+                    [(ngModel)]="patientDetails.postpartum_date"
                     (dateChange)="updatePostPatumDate($event)"
                     [min]="postPartumMinDate"
+                    [max]="postPartumMaxDate"
                   />
                   <mat-datepicker-toggle
                     matSuffix
@@ -261,16 +268,42 @@
                   <mat-label>Postpartum Day</mat-label>
                   <input
                     matInput
-                    [(ngModel)]="patientDetails.postpartumDay"
+                    [(ngModel)]="patientDetails.postpartum_day"
                     [readonly]="true"
                   />
                 </mat-form-field>
               </div>
             </div>
+
+            <div
+              class="row col-md-12 mt-2 mb-1 p0 mx-0"
+              *ngIf="procedureName === 'Postpartum'"
+            >
+              <div class="col-md-8 p0">
+                <div class="col-md-12 mb-1">
+                  <h5 class="text-secondary">Mode:</h5>
+                </div>
+                <div class="col-md-12 mt-1 mb-1">
+                  <ul>
+                    <li *ngFor="let mode of cpModeList">
+                      <mat-checkbox
+                        color="primary"
+                        class="example-margin"
+                        [(ngModel)]="mode.isChecked"
+                        (ngModelChange)="handleModeChange($event)"
+                      >
+                        {{ mode.mode_name }}
+                      </mat-checkbox>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
             <!-- For Procudure - C-Section -->
             <div
-              class="row col-md-12 p0 mx-0 mb-3"
-              *ngIf="selectedOBProcedure === 16"
+              class="row col-md-12 p0 mx-0"
+              *ngIf="procedureName === 'C-Section'"
               type="OB-C-Section"
             >
               <div class="row col-md-12 mt-2 mb-1 p0 mx-0">
@@ -285,19 +318,18 @@
                       color="secondary"
                       multiple
                       placeholder="C-Section Reason"
-                      [(ngModel)]="selectedCSectionReason"
-                      (ngModelChange)="onCSectionReasonChange($event)"
+                      [(ngModel)]="patientDetails.c_section_id"
                     >
                       <mat-option
                         *ngFor="let reason of csectionReasonList"
-                        [value]="reason.id"
+                        [value]="reason.reason_id"
                       >
                         {{ reason.reason }}</mat-option
                       >
                     </mat-select>
                   </mat-form-field>
                 </div>
-                <div class="col-md-4" *ngIf="isCSectionOthrReason">
+                <!-- <div class="col-md-4" *ngIf="isCSectionOthrReason">
                   <mat-form-field
                     class="example-full-width"
                     appearance="outline"
@@ -308,28 +340,7 @@
                       [(ngModel)]="patientDetails.csectionReasonOther"
                     />
                   </mat-form-field>
-                </div>
-              </div>
-              <div class="row col-md-12 mt-2 mb-1 p0 mx-0">
-                <div class="col-md-8 p0">
-                  <div class="col-md-12 mb-1">
-                    <h5 class="text-secondary">Mode:</h5>
-                  </div>
-                  <div class="col-md-12 mt-1 mb-1">
-                    <ul>
-                      <li *ngFor="let mode of cpModeList">
-                        <mat-checkbox
-                          color="primary"
-                          class="example-margin"
-                          [(ngModel)]="mode.isChecked"
-                          (ngModelChange)="handleModeChange($event)"
-                        >
-                          {{ mode.modeName }}
-                        </mat-checkbox>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
+                </div> -->
               </div>
 
               <div class="col-md-4 inducedReason">
@@ -347,12 +358,12 @@
                   </mat-radio-group>
                 </div>
               </div>
-              <div class="row col-md-12 mt-2 mb-2 p0">
+              <div
+                class="row col-md-12 mt-2 mb-2 p0"
+                *ngIf="patientDetails.induced === 'true'"
+              >
                 <div class="col-md-8 p0">
-                  <div
-                    class="col-md-12"
-                    *ngIf="patientDetails.induced === 'true'"
-                  >
+                  <div class="col-md-12">
                     <div class="col-md-12">
                       <h5 class="text-secondary">Reason for Induced:</h5>
                     </div>
@@ -363,16 +374,21 @@
                             color="primary"
                             class="example-margin"
                             [(ngModel)]="reason.isChecked"
-                            (ngModelChange)="handleInducedReasonChange($event)"
+                            (ngModelChange)="onInducedReasonChange($event)"
                           >
-                            {{ reason.irName }}
+                            {{ reason.ir_name }}
                           </mat-checkbox>
                         </li>
                       </ul>
                     </div>
                   </div>
                 </div>
-                <div class="col-md-4" *ngIf="isOtherInducedReason">
+                <div
+                  class="col-md-4"
+                  *ngIf="
+                    isOtherInducedReason && patientDetails.induced === 'true'
+                  "
+                >
                   <mat-form-field
                     class="example-full-width"
                     appearance="outline"
@@ -380,17 +396,32 @@
                     <mat-label>Other Induced Reason</mat-label>
                     <input
                       matInput
-                      [(ngModel)]="patientDetails.inducedReasonOthers"
+                      [(ngModel)]="patientDetails.induced_reason_others"
                     />
                   </mat-form-field>
                 </div>
               </div>
             </div>
 
-            <div class="col-md-12 mt-4 mb-1">
+            <div
+              class="col-md-12 mt-4 mb-1"
+              *ngIf="
+                procedureName === 'Antepartum' ||
+                procedureName === 'Intrapartum' ||
+                procedureName === 'Postpartum'
+              "
+            >
               <h5 class="text-secondary">Gestational Age:</h5>
             </div>
-            <div class="row col-md-12 p0 mx-0 mb-1">
+            <div
+              class="row col-md-12 p0 mx-0 mb-1"
+              *ngIf="
+                procedureName === 'Antepartum' ||
+                procedureName === 'Intrapartum' ||
+                procedureName === 'Postpartum' ||
+                procedureName === 'Other'
+              "
+            >
               <div class="col-md-4">
                 <mat-form-field appearance="outline" class="gsps_weeks_days">
                   <mat-label>Weeks</mat-label>
@@ -423,49 +454,215 @@
                   </mat-select>
                 </mat-form-field>
               </div>
+            </div>
 
-              <div class="col-md-4">
-                <mat-form-field appearance="outline" class="gtpal_width">
-                  <mat-label>G </mat-label>
-                  <mat-select color="secondary" [(ngModel)]="gspsg">
-                    <mat-option *ngFor="let value of gspsList" [value]="value">
-                      {{ value }}</mat-option
-                    >
-                  </mat-select>
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="gtpal_width">
-                  <mat-label>T </mat-label>
-                  <mat-select color="secondary" [(ngModel)]="gspst">
-                    <mat-option *ngFor="let value of gspsList" [value]="value">
-                      {{ value }}</mat-option
-                    >
-                  </mat-select>
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="gtpal_width">
-                  <mat-label>P </mat-label>
-                  <mat-select color="secondary" [(ngModel)]="gspsp">
-                    <mat-option *ngFor="let value of gspsList" [value]="value">
-                      {{ value }}</mat-option
-                    >
-                  </mat-select>
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="gtpal_width">
-                  <mat-label>A </mat-label>
-                  <mat-select color="secondary" [(ngModel)]="gspsa">
-                    <mat-option *ngFor="let value of gspsList" [value]="value">
-                      {{ value }}</mat-option
-                    >
-                  </mat-select>
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="gtpal_width">
-                  <mat-label>L </mat-label>
-                  <mat-select color="secondary" [(ngModel)]="gspsl">
-                    <mat-option *ngFor="let value of gspsList" [value]="value">
-                      {{ value }}</mat-option
-                    >
-                  </mat-select>
-                </mat-form-field>
+            <div
+              class="row col-md-12 p0 mt-2 mx-0 mb-5"
+              type="babyInfo"
+              *ngIf="
+                procedureName === 'Postpartum' || procedureName === 'C-Section'
+              "
+            >
+              <div class="col-md-12 mt-2 mb-3">
+                <h5 class="text-secondary">Baby Info:</h5>
               </div>
+              <div class="row col-md-12 p0 mx-0 mb-1">
+                <div class="row col-md-12 p0 mx-0 mb-2 mt-1">
+                  <div class="col-md-4">
+                    <mat-radio-group
+                      aria-label="Select an option"
+                      [(ngModel)]="patientDetails.baby.baby_info"
+                      (ngModelChange)="
+                        onBabyInfoChange(patientDetails.baby.baby_info)
+                      "
+                      color="primary"
+                    >
+                      <mat-radio-button value="1">Singleton</mat-radio-button>
+                      <mat-radio-button value="2">Twin</mat-radio-button>
+                      <mat-radio-button value="Other">Other</mat-radio-button>
+                    </mat-radio-group>
+                  </div>
+
+                  <div
+                    class="col-md-4"
+                    *ngIf="patientDetails.baby.baby_info === 'Other'"
+                  >
+                    <mat-form-field
+                      class="example-full-width"
+                      appearance="outline"
+                    >
+                      <mat-label>Other Info</mat-label>
+
+                      <mat-select
+                        color="secondary"
+                        [(ngModel)]="this.patientDetails.baby.baby_other_info"
+                        (ngModelChange)="onBabyInfoChange($event)"
+                      >
+                        <mat-option value="3">3</mat-option>
+                        <mat-option value="4">4</mat-option>
+                        <mat-option value="5">5</mat-option>
+                        <mat-option value="6">6</mat-option>
+                        <mat-option value="7">7</mat-option>
+                        <mat-option value="8">8</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="col-md-12 mt-3 mb-3 mx-0 p-0">
+                  <mat-accordion multi>
+                    <mat-expansion-panel
+                      *ngFor="
+                        let baby of patientDetails.baby.baby_list;
+                        index as index
+                      "
+                      [expanded]="baby.open"
+                    >
+                      <mat-expansion-panel-header color="primary">
+                        <mat-panel-title class="text-info">
+                          <h5>Baby: {{ index + 1 }}</h5>
+                        </mat-panel-title>
+                      </mat-expansion-panel-header>
+
+                      <div class="row col-md-12">
+                        <div class="col-md-4">
+                          <mat-form-field
+                            class="example-full-width"
+                            appearance="outline"
+                          >
+                            <mat-label>Birth Weight</mat-label>
+                            <input
+                              type="text"
+                              matInput
+                              [(ngModel)]="baby.birth_weight"
+                            />
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-4">
+                          <mat-form-field
+                            appearance="outline"
+                            class="example-full-width"
+                          >
+                            <mat-label>Birth Date</mat-label>
+                            <input
+                              matInput
+                              [matDatepicker]="babyBirthDate"
+                              [min]="minBirthDate"
+                              [max]="maxBirthDate"
+                              [(ngModel)]="baby.baby_birth_date"
+                            />
+                            <mat-datepicker-toggle
+                              matSuffix
+                              [for]="babyBirthDate"
+                            ></mat-datepicker-toggle>
+                            <mat-datepicker #babyBirthDate></mat-datepicker>
+                          </mat-form-field>
+                        </div>
+
+                        <div class="col-md-4 otherRadioYN">
+                          <div class="col-md-4 mt-2 mb-1 p0">
+                            <h6 class="text-secondary">Sex of Baby:</h6>
+                          </div>
+                          <div class="col-md-8 mt-2 mb-1 p0">
+                            <mat-radio-group
+                              aria-label="Select an option"
+                              [(ngModel)]="baby.baby_gender"
+                              color="primary"
+                            >
+                              <mat-radio-button value="M">M</mat-radio-button>
+                              <mat-radio-button value="F">F</mat-radio-button>
+                            </mat-radio-group>
+                          </div>
+                        </div>
+
+                        <div class="col-md-4 otherRadioYN">
+                          <div class="col-md-4 mt-2 mb-1 p0">
+                            <h6 class="text-secondary">NICU:</h6>
+                          </div>
+                          <div class="col-md-8 mt-2 mb-1 p0">
+                            <mat-radio-group
+                              aria-label="Select an option"
+                              [(ngModel)]="baby.nicu"
+                              color="primary"
+                            >
+                              <mat-radio-button [value]="true"
+                                >Y</mat-radio-button
+                              >
+                              <mat-radio-button [value]="false"
+                                >N</mat-radio-button
+                              >
+                            </mat-radio-group>
+                          </div>
+                        </div>
+
+                        <div class="col-md-4 otherRadioYN">
+                          <div class="col-md-4 mt-2 mb-1 p0">
+                            <h6 class="text-secondary">APGAR 5 min:</h6>
+                          </div>
+                          <div class="col-md-8 mt-2 mb-1 p0">
+                            <mat-radio-group
+                              aria-label="Select an option"
+                              [(ngModel)]="baby.apgar"
+                              color="primary"
+                            >
+                              <mat-radio-button value=">7">
+                                &gt;7</mat-radio-button
+                              >
+                              <mat-radio-button value="<7">
+                                &lt;7</mat-radio-button
+                              >
+                            </mat-radio-group>
+                          </div>
+                        </div>
+
+                        <div class="col-md-4 otherRadioYN">
+                          <div class="col-md-4 mt-2 mb-1 p0">
+                            <h6 class="text-secondary">Live Birth:</h6>
+                          </div>
+                          <div class="col-md-8 mt-2 mb-1 p0">
+                            <mat-radio-group
+                              aria-label="Select an option"
+                              [(ngModel)]="baby.live_birth"
+                              color="primary"
+                            >
+                              <mat-radio-button [value]="true"
+                                >Y</mat-radio-button
+                              >
+                              <mat-radio-button [value]="false"
+                                >N</mat-radio-button
+                              >
+                            </mat-radio-group>
+                          </div>
+                        </div>
+
+                        <div class="col-md-4 otherRadioYN">
+                          <div class="col-md-4 mt-2 mb-1 p0">
+                            <h6 class="text-secondary">Vertex:</h6>
+                          </div>
+                          <div class="col-md-8 mt-2 mb-1 p0">
+                            <mat-radio-group
+                              aria-label="Select an option"
+                              [(ngModel)]="baby.vertex"
+                              color="primary"
+                            >
+                              <mat-radio-button [value]="true"
+                                >Y</mat-radio-button
+                              >
+                              <mat-radio-button [value]="false"
+                                >N</mat-radio-button
+                              >
+                            </mat-radio-group>
+                          </div>
+                        </div>
+                      </div>
+                    </mat-expansion-panel>
+                  </mat-accordion>
+                </div>
+              </div>
+            </div>
+
+            <div class="row col-md-12 p0 mx-0 mb-1">
               <div class="col-md-4">
                 <mat-form-field appearance="outline" class="example-full-width">
                   <mat-label>GBS (+/-) </mat-label>
@@ -479,152 +676,62 @@
                   </mat-select>
                 </mat-form-field>
               </div>
-            </div>
-
-            <div class="row col-md-12 p0 mt-2 mx-0 mb-1" type="babyInfo">
-              <div class="col-md-12 mt-2 mb-3">
-                <h5 class="text-secondary">Baby Info:</h5>
-              </div>
-              <div class="row col-md-12 p0 mx-0 mb-1">
-                <div class="row col-md-12 p0 mx-0 mb-2 mt-1">
-                  <div class="col-md-4">
-                    <mat-radio-group
-                      aria-label="Select an option"
-                      [(ngModel)]="patientDetails.babyInfo"
-                      color="primary"
+              <div class="col-md-4">
+                <mat-form-field appearance="outline" class="gtpal_width">
+                  <mat-label>G </mat-label>
+                  <mat-select
+                    color="secondary"
+                    [(ngModel)]="patientDetails.gravida"
+                  >
+                    <mat-option *ngFor="let value of gList" [value]="value">
+                      {{ value }}</mat-option
                     >
-                      <mat-radio-button value="1">Singleton</mat-radio-button>
-                      <mat-radio-button value="2">Twin</mat-radio-button>
-                      <mat-radio-button value="3">Other</mat-radio-button>
-                    </mat-radio-group>
-                  </div>
-
-                  <div class="col-md-4" *ngIf="patientDetails.babyInfo === '3'">
-                    <mat-form-field
-                      class="example-full-width"
-                      appearance="outline"
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="gtpal_width">
+                  <mat-label>T </mat-label>
+                  <mat-select
+                    color="secondary"
+                    [(ngModel)]="patientDetails.term"
+                  >
+                    <mat-option *ngFor="let value of gspsList" [value]="value">
+                      {{ value }}</mat-option
                     >
-                      <mat-label>Other Info</mat-label>
-                      <input
-                        matInput
-                        [(ngModel)]="patientDetails.babyOtherInfo"
-                      />
-                    </mat-form-field>
-                  </div>
-                </div>
-                <div class="row col-md-12 p0 mx-0 mb-2 mt-1">
-                  <div class="col-md-4">
-                    <mat-form-field
-                      class="example-full-width"
-                      appearance="outline"
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="gtpal_width">
+                  <mat-label>P </mat-label>
+                  <mat-select
+                    color="secondary"
+                    [(ngModel)]="patientDetails.preterm"
+                  >
+                    <mat-option *ngFor="let value of gspsList" [value]="value">
+                      {{ value }}</mat-option
                     >
-                      <mat-label>Birth Weight</mat-label>
-                      <input
-                        type="number"
-                        matInput
-                        [(ngModel)]="patientDetails.birthWeight"
-                      />
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-4">
-                    <mat-form-field
-                      appearance="outline"
-                      class="example-full-width"
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="gtpal_width">
+                  <mat-label>A </mat-label>
+                  <mat-select
+                    color="secondary"
+                    [(ngModel)]="patientDetails.abortions"
+                  >
+                    <mat-option *ngFor="let value of gspsList" [value]="value">
+                      {{ value }}</mat-option
                     >
-                      <mat-label>Birth Date</mat-label>
-                      <input
-                        matInput
-                        [matDatepicker]="babyBirthDate"
-                        [(ngModel)]="patientDetails.babyBirthDate"
-                        (dateChange)="updatebabyBirthDate($event)"
-                      />
-                      <mat-datepicker-toggle
-                        matSuffix
-                        [for]="babyBirthDate"
-                      ></mat-datepicker-toggle>
-                      <mat-datepicker #babyBirthDate></mat-datepicker>
-                    </mat-form-field>
-                  </div>
-                </div>
-                <div class="col-md-4 otherRadioYN">
-                  <div class="col-md-4 mt-2 mb-1 p0">
-                    <h6 class="text-secondary">Sex of Baby:</h6>
-                  </div>
-                  <div class="col-md-8 mt-2 mb-1 p0">
-                    <mat-radio-group
-                      aria-label="Select an option"
-                      [(ngModel)]="patientDetails.babyGender"
-                      color="primary"
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="gtpal_width">
+                  <mat-label>L </mat-label>
+                  <mat-select
+                    color="secondary"
+                    [(ngModel)]="patientDetails.living"
+                  >
+                    <mat-option *ngFor="let value of gspsList" [value]="value">
+                      {{ value }}</mat-option
                     >
-                      <mat-radio-button value="M">M</mat-radio-button>
-                      <mat-radio-button value="F">F</mat-radio-button>
-                    </mat-radio-group>
-                  </div>
-                </div>
-
-                <div class="col-md-4 otherRadioYN">
-                  <div class="col-md-4 mt-2 mb-1 p0">
-                    <h6 class="text-secondary">NICU:</h6>
-                  </div>
-                  <div class="col-md-8 mt-2 mb-1 p0">
-                    <mat-radio-group
-                      aria-label="Select an option"
-                      [(ngModel)]="patientDetails.nicu"
-                      color="primary"
-                    >
-                      <mat-radio-button value="true">Y</mat-radio-button>
-                      <mat-radio-button value="false">N</mat-radio-button>
-                    </mat-radio-group>
-                  </div>
-                </div>
-
-                <div class="col-md-4 otherRadioYN">
-                  <div class="col-md-4 mt-2 mb-1 p0">
-                    <h6 class="text-secondary">APGAR 5 min:</h6>
-                  </div>
-                  <div class="col-md-8 mt-2 mb-1 p0">
-                    <mat-radio-group
-                      aria-label="Select an option"
-                      [(ngModel)]="patientDetails.apgar"
-                      color="primary"
-                    >
-                      <mat-radio-button value=">7"> &gt;7</mat-radio-button>
-                      <mat-radio-button value="<7"> &lt;7</mat-radio-button>
-                    </mat-radio-group>
-                  </div>
-                </div>
-
-                <div class="col-md-4 otherRadioYN">
-                  <div class="col-md-4 mt-2 mb-1 p0">
-                    <h6 class="text-secondary">Live Birth:</h6>
-                  </div>
-                  <div class="col-md-8 mt-2 mb-1 p0">
-                    <mat-radio-group
-                      aria-label="Select an option"
-                      [(ngModel)]="patientDetails.liveBirth"
-                      color="primary"
-                    >
-                      <mat-radio-button value="true">Y</mat-radio-button>
-                      <mat-radio-button value="false">N</mat-radio-button>
-                    </mat-radio-group>
-                  </div>
-                </div>
-
-                <div class="col-md-4 otherRadioYN">
-                  <div class="col-md-4 mt-2 mb-1 p0">
-                    <h6 class="text-secondary">Vertex:</h6>
-                  </div>
-                  <div class="col-md-8 mt-2 mb-1 p0">
-                    <mat-radio-group
-                      aria-label="Select an option"
-                      [(ngModel)]="patientDetails.vertex"
-                      color="primary"
-                    >
-                      <mat-radio-button value="true">Y</mat-radio-button>
-                      <mat-radio-button value="false">N</mat-radio-button>
-                    </mat-radio-group>
-                  </div>
-                </div>
+                  </mat-select>
+                </mat-form-field>
               </div>
             </div>
           </div>
@@ -632,7 +739,7 @@
           <div
             class="row col-md-12 p0 mx-0"
             type="GYN"
-            *ngIf="patientDetails.patientTypeId === '2'"
+            *ngIf="patientDetails.patient_type_id === '2'"
           >
             <div class="col-md-12 mb-1">
               <h3 class="text-info">GYN</h3>
@@ -643,9 +750,9 @@
                 <input
                   matInput
                   [min]="dateOfSurgeryMinDate"
+                  [max]="dateOfSurgeryMaxDate"
                   [matDatepicker]="picker1"
-                  [(ngModel)]="patientDetails.surgeryDate"
-                  (dateChange)="handleSurgeryDateChange($event)"
+                  [(ngModel)]="patientDetails.surgery_date"
                 />
                 <mat-datepicker-toggle
                   matSuffix
@@ -658,7 +765,10 @@
             <div class="col-md-4">
               <mat-form-field class="example-full-width" appearance="outline">
                 <mat-label>Surgeon</mat-label>
-                <input matInput [(ngModel)]="patientDetails.surgeon" />
+                <input
+                  matInput
+                  [(ngModel)]="patientDetails.performing_surgeon"
+                />
               </mat-form-field>
             </div>
 
@@ -666,9 +776,9 @@
               <mat-form-field class="example-full-width" appearance="outline">
                 <mat-label>Pre-op Diagnosis</mat-label>
                 <input
-                  [readonly]="true"
+                  type="text"
                   matInput
-                  [(ngModel)]="patientDetails.preop"
+                  [(ngModel)]="patientDetails.pre_op"
                 />
               </mat-form-field>
             </div>
@@ -718,21 +828,111 @@
                 <mat-label>Post-op Antibiotics </mat-label>
                 <mat-select
                   color="secondary"
-                  [(ngModel)]="patientDetails.postop"
+                  [(ngModel)]="patientDetails.post_op_antibiotics"
                   name="postop"
                 >
                   <mat-option value="0"></mat-option>
-                  <mat-option value="Y"> Yes</mat-option>
-                  <mat-option value="N"> No</mat-option>
+                  <mat-option [value]="true"> Yes</mat-option>
+                  <mat-option [value]="false"> No</mat-option>
                 </mat-select>
               </mat-form-field>
             </div>
           </div>
           <hr class="mt-2 mb-3" />
-          <div class="row col-md-12 p0 mx-0">
+
+          <div class="col-12">
+            <div class="col-md-12 mb-2 mx-0 p-0">
+              <h5 class="text-info">
+                Pertinent Info:<span class="text-danger">*</span>
+              </h5>
+            </div>
+            <div class="col-md-12 mt-3 mb-3 mx-0 p-0">
+              <mat-accordion multi>
+                <mat-expansion-panel
+                  [expanded]="true"
+                  *ngFor="let info of patientPertinentInfoList; index as index"
+                >
+                  <mat-expansion-panel-header color="primary">
+                    <mat-panel-title class="text-info">
+                      Day {{ index + 1 }}
+                    </mat-panel-title>
+                    <mat-panel-description class="text-info">
+                      {{ info._id }}
+                    </mat-panel-description>
+                  </mat-expansion-panel-header>
+
+                  <div class="example-container mat-elevation-z8">
+                    <mat-table #table [dataSource]="info.list">
+                      <ng-container matColumnDef="firstName">
+                        <mat-header-cell *matHeaderCellDef>
+                          Name
+                        </mat-header-cell>
+                        <mat-cell *matCellDef="let dayDesc">
+                          {{ dayDesc.approver_info[0].first_name }}
+                          {{ dayDesc.approver_info[0].last_name }}
+                        </mat-cell>
+                      </ng-container>
+
+                      <ng-container matColumnDef="updatedDate">
+                        <mat-header-cell *matHeaderCellDef>
+                          Updated Date
+                        </mat-header-cell>
+                        <mat-cell *matCellDef="let dayDesc">
+                          {{ dayDesc.updated_date }}
+                        </mat-cell>
+                      </ng-container>
+
+                      <ng-container matColumnDef="pertinentInfo">
+                        <mat-header-cell *matHeaderCellDef>
+                          Pertinent Info
+                        </mat-header-cell>
+                        <mat-cell
+                          *matCellDef="let dayDesc"
+                          [satPopoverAnchorFor]="p"
+                          (click)="openCommentPopUp(p, dayDesc)"
+                        >
+                          <ng-container>
+                            {{ dayDesc.pertinent_info }}
+                          </ng-container>
+
+                          <sat-popover
+                            #p
+                            hasBackdrop
+                            xAlign="start"
+                            yAlign="start"
+                            (closed)="update(dayDesc.value, $event)"
+                          >
+                            <inline-edit
+                              [value]="dayDesc.pertinent_info"
+                            ></inline-edit>
+                          </sat-popover>
+                        </mat-cell>
+                      </ng-container>
+
+                      <mat-header-row
+                        *matHeaderRowDef="this.displayedColumns"
+                      ></mat-header-row>
+                      <mat-row
+                        *matRowDef="let row; columns: displayedColumns"
+                      ></mat-row>
+                    </mat-table>
+                  </div>
+
+
+                </mat-expansion-panel>
+              </mat-accordion>
+            </div>
+            <mat-form-field appearance="outline" class="example-full-width">
+              <mat-label>Add Pertinent Info</mat-label>
+              <textarea matInput [(ngModel)]="patientDetails.pertinent_info">
+              </textarea>
+            </mat-form-field>
+          </div>
+
+          <!-- <div class="row col-md-12 p0 mx-0">
             <hr />
-            <div class="col-md-12 mb-1">
-              <h5 class="text-secondary">
+            <div class="col-md-12 mb-3">
+              <h5 class="text-info">
                 Appointment
                 <mat-hint
                   class="hintFont"
@@ -753,10 +953,6 @@
                   [(ngModel)]="patientDetails.appointmentStartTime"
                 />
 
-                <!-- <mat-datepicker-toggle
-                  matSuffix
-                  [for]="appointmentStartTime"
-                ></mat-datepicker-toggle> -->
                 <mat-datepicker #appointmentStartTime></mat-datepicker>
               </mat-form-field>
             </div>
@@ -769,124 +965,10 @@
                   [(ngModel)]="patientDetails.appointmentEndTime"
                 />
 
-                <!-- <mat-datepicker-toggle
-                  matSuffix
-                  [for]="appointmentEndTime"
-                ></mat-datepicker-toggle> -->
                 <mat-datepicker #appointmentEndTime></mat-datepicker>
               </mat-form-field>
             </div>
-            <!-- <div class="col-md-4">
-              <mat-form-field appearance="outline" class="example-full-width">
-                <mat-label>Physicians Name</mat-label>
-                <mat-select color="secondary" [(ngModel)]="physicianName">
-                  <mat-option
-                    *ngFor="let value of physiciansList"
-                    [value]="value"
-                  >
-                    {{ value }}</mat-option
-                  >
-                </mat-select>
-              </mat-form-field>
-            </div> -->
-          </div>
-
-          <div class="col-12">
-            <div class="col-md-12 mb-2 mx-0 p-0">
-              <h4 class="text-info">
-                Pertinent Info:<span class="text-danger">*</span>
-              </h4>
-            </div>
-            <div class="col-md-12 mt-3 mb-3 mx-0 p-0">
-              <mat-accordion multi>
-                <mat-expansion-panel
-                  [expanded]="true"
-                  *ngFor="
-                    let info of patientPertinentInfoList | keyvalue;
-                    index as index
-                  "
-                >
-                  <mat-expansion-panel-header color="primary">
-                    <mat-panel-title class="text-info">
-                      Day {{ index + 1 }}
-                    </mat-panel-title>
-                    <mat-panel-description class="text-info">
-                      {{ info.key }}
-                    </mat-panel-description>
-                  </mat-expansion-panel-header>
-
-                  <div class="example-container mat-elevation-z8">
-                    <mat-table #table [dataSource]="info.value | keyvalue">
-                      <ng-container matColumnDef="firstName">
-                        <mat-header-cell *matHeaderCellDef>
-                          Name
-                        </mat-header-cell>
-                        <mat-cell *matCellDef="let dayDesc">
-                          {{ dayDesc.value.mstUsers.firstName }}
-                        </mat-cell>
-                      </ng-container>
-
-                      <ng-container matColumnDef="updatedDate">
-                        <mat-header-cell *matHeaderCellDef>
-                          Updated Date
-                        </mat-header-cell>
-                        <mat-cell *matCellDef="let dayDesc">
-                          {{ dayDesc.value.updatedDate }}
-                        </mat-cell>
-                      </ng-container>
-
-                      <ng-container matColumnDef="pertinentInfo">
-                        <mat-header-cell *matHeaderCellDef>
-                          Pertinent Info
-                        </mat-header-cell>
-                        <mat-cell
-                          *matCellDef="let dayDesc"
-                          [satPopoverAnchorFor]="p"
-                          (click)="p.open()"
-                        >
-                          <ng-container>
-                            {{ dayDesc.value.pertinentInfo }}
-                          </ng-container>
-
-                          <sat-popover
-                            #p
-                            hasBackdrop
-                            xAlign="start"
-                            yAlign="start"
-                            (closed)="update(dayDesc.value, $event)"
-                          >
-                            <inline-edit
-                              [value]="dayDesc.value.pertinentInfo"
-                            ></inline-edit>
-                          </sat-popover>
-                        </mat-cell>
-                      </ng-container>
-
-                      <mat-header-row
-                        *matHeaderRowDef="this.displayedColumns"
-                      ></mat-header-row>
-                      <mat-row
-                        *matRowDef="let row; columns: displayedColumns"
-                      ></mat-row>
-                    </mat-table>
-                  </div>
-
-                  <!-- <p
-                    *ngFor="let dayDesc of info.value | keyvalue"
-                    class="grid5"
-                  >
-                    {{ dayDesc.value.mstUsers.firstName }} :
-                    {{ dayDesc.value.pertinentInfo }} -
-                    {{ dayDesc.value.updatedDate }}
-                  </p> -->
-                </mat-expansion-panel>
-              </mat-accordion>
-            </div>
-            <mat-form-field appearance="outline" class="example-full-width">
-              <mat-label>Add Pertinent Info</mat-label>
-              <textarea matInput [(ngModel)]="patientDetails.desc"> </textarea>
-            </mat-form-field>
-          </div>
+          </div> -->
 
           <div class="row col-md-12 mx-0 actionButtonsWrapper">
             <button
@@ -900,6 +982,7 @@
               mat-raised-button
               class="btn btn-info actionButtons"
               (click)="savePatientDetails()"
+              *ngIf="patientStatus !== 'discharged'"
             >
               Save
             </button>

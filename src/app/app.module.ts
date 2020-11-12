@@ -28,6 +28,7 @@ import {
   MatFormFieldModule,
   MatExpansionModule,
 } from "@angular/material";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 import { AboutComponent } from "./about/about.component";
 import { AddgynpatientsComponent } from "./home/addgynpatients/addgynpatients.component";
@@ -42,6 +43,7 @@ import {
   OutPatientsComponent,
   DialogContentOutDialog,
 } from "./home/out-patients/out-patients.component";
+import { AlertDialogComponent } from "./home/alert-dialog/alert-dialog.component";
 import { SchedulerComponent } from "./home/scheduler/scheduler.component";
 import { SettingsComponent } from "./home/settings/settings.component";
 import { UserInfoComponent } from "./home/user-info/user-info.component";
@@ -73,6 +75,7 @@ import { InlineEditComponent } from "./inline-edit/inline-edit.component";
     DialogContentExampleDialog,
     DialogContentOutDialog,
     InlineEditComponent,
+    AlertDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -95,12 +98,14 @@ import { InlineEditComponent } from "./inline-edit/inline-edit.component";
     MatFormFieldModule,
     MatExpansionModule,
     SatPopoverModule,
+    MatProgressSpinnerModule,
   ],
   entryComponents: [
     AppComponent,
     DialogContentExampleDialog,
     DialogContentOutDialog,
     InlineEditComponent,
+    AlertDialogComponent,
   ],
   providers: [CsvDataService, NotificationService],
   bootstrap: [AppComponent],

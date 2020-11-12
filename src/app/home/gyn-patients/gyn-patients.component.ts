@@ -57,7 +57,7 @@ export class GynPatientsComponent implements OnInit {
     this.newGynPatientsList = this.gynPatientsList;
     this.newGynPatientsList = this.newGynPatientsList.map((val) => ({
       ...val,
-      fullName: `${val.mstUsers.firstName} ${val.mstUsers.lastName}`,
+      fullName: `${val.first_name} ${val.last_name}`,
     }));
     this.dataSource = new MatTableDataSource(this.newGynPatientsList);
     this.tempPatientsList = this.gynPatientsList;
@@ -92,9 +92,7 @@ export class GynPatientsComponent implements OnInit {
     const val = event.target.value;
     if (val && val.trim() !== "") {
       this.tempPatientsList = this.gynPatientsList.filter((item: any) => {
-        return (
-          item.mstUsers.firstName.toLowerCase().indexOf(val.toLowerCase()) > -1
-        );
+        return item.first_name.toLowerCase().indexOf(val.toLowerCase()) > -1;
       });
     } else {
       this.tempPatientsList = this.gynPatientsList;

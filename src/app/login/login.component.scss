@@ -1,32 +1,57 @@
-
-.login-block{
+.login-block {
   height: 100%;
-  background: #368ee0;
+  background: #efeff4;
   .login-form {
     width: 400px;
     height: 500px;
-    margin: -200px -200px;
+    margin: 0 -200px;
     position: absolute;
     left: 50%;
-    top: 50%;
-    .login-header{
-      background: #2c5582;
+    top: 5%;
+    .login-header {
+      text-align: center;
+      background: #efeff4;
+      img {
+        width: 100px;
+        height: 100px;
+        margin: 2%;
+      }
+      div {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        h1 {
+          font-family: abeatbyKai;
+        }
+      }
     }
     .login-body {
       margin-top: -2px;
       padding-top: 10px;
-      background: #fff;
-      h2{
-        font-weight: 300;
-        color: #333;
+      background: #f4f4fb;
+      h2 {
+        padding: 0 30px;
+        color: #10172f;
+        font-family: "PoppinsMedium";
         font-size: 24px;
-        margin-bottom: 10px;
-        padding: 0 30px;
+        letter-spacing: 0.5px;
       }
-      .control-group{
-        margin-bottom: 20px;
+
+      .subhead {
+        padding: 10px 30px;
+        color: #5a6ca0;
+        font-family: "PoppinsLight";
+        font-size: 16px;
+        letter-spacing: 0.5px;
+        margin: 0px;
+      }
+      .control-group {
+        margin-top: 10px;
         padding: 0 30px;
-        .form-input{
+        .example-full-width {
+          width: 100%;
+        }
+        .form-input {
           width: 100%;
           display: block;
           height: 35px;
@@ -46,29 +71,32 @@
           -moz-transition: border linear 0.2s, box-shadow linear 0.2s;
           -o-transition: border linear 0.2s, box-shadow linear 0.2s;
           transition: border linear 0.2s, box-shadow linear 0.2s;
-          &:focus{
+          &:focus {
             border-color: rgba(82, 168, 236, 0.8);
             outline: 0;
           }
-          &:visited{
+          &:visited {
             border-color: rgba(82, 168, 236, 0.8);
             outline: 0;
           }
         }
       }
-      .submit{
+      .submit {
         padding: 0 30px;
+        display: flex;
+        justify-content: space-evenly;
       }
-      .forget{
+      .forget {
         margin-top: 50px;
         a {
-          background: #eee;
+          background: #f4f4fb;
           padding: 10px 0;
           text-align: center;
           display: block;
           text-decoration: none;
-          color: #555;
-          font-size: 13px;
+          color: #1faa60;
+          font-size: 16px;
+          font-family: "PoppinsRegular";
           span {
             line-height: 30px;
             margin-bottom: 10px;
@@ -79,16 +107,15 @@
     }
   }
 }
-.blue-btn{
-  background: #368ee0;
+.blue-btn {
+  background: #1faa60;
   color: #fff;
   padding: 7px 10px;
   transition: all linear 0.2s;
-  &:hover{
-    background: #2a6ee7;
+  &:hover {
+    background: #1faa60;
   }
-  &:active{
-    background: #2a6ee7;
+  &:active {
+    background: #1faa60;
   }
 }
-

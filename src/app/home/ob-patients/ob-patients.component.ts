@@ -12,6 +12,7 @@ import {
   MatDialogRef,
   MatDialogConfig,
 } from "@angular/material/dialog";
+import { AlertDialogComponent } from "../alert-dialog/alert-dialog.component";
 
 export interface ObPatientsData {
   fullName: string;
@@ -37,7 +38,7 @@ export class ObPatientsComponent implements OnInit {
     "actions",
   ];
   dataSource: MatTableDataSource<ObPatientsData>;
-
+  loading = false;
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: false }) sort: MatSort;
 
@@ -49,6 +50,7 @@ export class ObPatientsComponent implements OnInit {
       this.dataSource.paginator.firstPage();
     }
   }
+  // *** Open Dialog to Discharge Patient ***
   openDialog(patientRow) {
     console.log(patientRow);
     const dialogConfig = new MatDialogConfig();
@@ -65,7 +67,7 @@ export class ObPatientsComponent implements OnInit {
     );
 
     dialogRef.afterClosed().subscribe((data) => {
-      if (data && data.id) {
+      if (data && data.patient_id) {
         this.DischargePatient(data);
       }
     });
@@ -87,36 +89,55 @@ export class ObPatientsComponent implements OnInit {
     this.getPatients();
   }
 
+  openMessageDialog(message) {
+    const dialogRef = this.dialog.open(AlertDialogComponent, {
+      data: {
+        message: message,
+        buttonText: {
+          cancel: "Ok",
+        },
+      },
+    });
+  }
+
   getPatients() {
     console.log("Into get patients");
+    this.loading = true;
     this.obPatientsList = [];
     this.tempPatientsList = [];
     // this.appService.showLoader();
     this.loginSer
-      .fetchPatients(environment.api.showPatients, "census")
-      .subscribe((data: any) => {
-        // this.appService.hideLoader();
-        if (data._statusCode === "200") {
-          this.obPatientsList = data.data.obPatientsList;
-          this.gynPatientsList = data.data.gynPatientsList;
-          this.obPatientsList = data.data.obPatientsList.map((val) => ({
-            ...val,
-            fullName: `${val.mstUsers.firstName} ${val.mstUsers.lastName}`,
-            edd: (val.edd && moment(val.edd).format("MM/DD/YYYY")) || val.edd,
-          }));
+      .fetchPatients(environment.api.getPatientsNew, "census", 1)
+      .then((data: any) => {
+        console.log(data.status);
+        //this.appService.hideLoader();
+        if (data.status) {
+          console.log("data.data..", data.data);
+          this.obPatientsList = data.data
+            .filter((val) => val.patient_type_id === 1)
+            .map((val) => ({
+              ...val,
+              fullName: `${val.first_name} ${val.last_name}`,
+              edd: (val.edd && moment(val.edd).format("MM/DD/YYYY")) || val.edd,
+            }));
+          this.gynPatientsList = data.data
+            .filter((val) => val.patient_type_id === 2)
+            .map((val) => ({
+              ...val,
+              fullName: `${val.first_name} ${val.last_name}`,
+            }));
+
           this.dataSource = new MatTableDataSource(this.obPatientsList);
           this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
-
-          this.obPatientsList.forEach((item: any) => {
-            item.avatar = item.mstUsers.firstName.substring(0, 1);
-            item.color = this.appService.getRandomColor();
-          });
-          this.tempPatientsList = this.obPatientsList;
+          this.loading = false;
+          console.log("obPatientsList..", this.obPatientsList);
+          console.log("gynPatientsList..", this.gynPatientsList);
         } else if (!data.status) {
           this.goToLoginScreen();
         } else {
-          this.appService.error("!Error", data.message);
+          //this.appService.alert("!Error", data.message);
+          this.openMessageDialog("Error in Fetching Patients");
         }
       });
   }
@@ -129,33 +150,11 @@ export class ObPatientsComponent implements OnInit {
     const val = event.target.value;
     if (val && val.trim() !== "") {
       this.tempPatientsList = this.obPatientsList.filter((item: any) => {
-        return (
-          item.mstUsers.firstName.toLowerCase().indexOf(val.toLowerCase()) > -1
-        );
+        return item.first_name.toLowerCase().indexOf(val.toLowerCase()) > -1;
       });
     } else {
       this.tempPatientsList = this.obPatientsList;
     }
-  }
-
-  unAdmitPatient(item: any) {
-    const userdata = {
-      token: localStorage.getItem("deviceToken"),
-      patientDetailsId: item.mstUsers.userId,
-    };
-    // this.appService.showLoader();
-    this.loginSer.fetchUnAdimtPatient(userdata).subscribe((data: any) => {
-      console.log(data.data);
-      //this.appService.hideLoader();
-      if (data.status) {
-        this.getPatients();
-      } else if (!data.status) {
-        this.goToLoginScreen();
-      } else {
-        // this.appService.hideLoader();
-        this.appService.alert("!Error", data.message);
-      }
-    });
   }
 
   viewPatientDetails() {}
@@ -210,25 +209,28 @@ export class ObPatientsComponent implements OnInit {
   DischargePatient(item: any) {
     console.log(item);
     try {
-      const userdata = {
-        token: localStorage.getItem("deviceToken"),
-        patientDetailsId: item.mstUsers.userId,
-      };
-      //this.appService.showLoader();
-      this.loginSer.fetchDischargePatient(userdata).subscribe((data: any) => {
-        console.log(data.data);
-        //this.appService.hideLoader();
-        this.getPatients();
-
-        // if (data.status) {
-        //   this.getPatients();
-        // } else if (!data.status) {
-        //   this.goToLoginScreen();
-        // } else {
-        //   //  this.appService.hideLoader();
-        //   this.appService.alert("!Error", data.message);
-        // }
-      });
+      this.loginSer
+        .dischargePatientNew(environment.api.dischargePatientNew, {
+          admission_status: "OUT",
+          patient_id: item.patient_id,
+        })
+        .then((data: any) => {
+          // this.appService.hideLoader();
+          if (data.status) {
+            this.getPatients();
+            // this.appService.alert(
+            //   "Success",
+            //   "Patient Discharged Successfully."
+            // );
+            this.openMessageDialog("Patient Discharged Successfully.");
+          } else if (!data.status) {
+            this.goToLoginScreen();
+          } else {
+            //this.appService.hideLoader();
+            this.appService.alert("!Error", data.message);
+            this.openMessageDialog(data.message);
+          }
+        });
     } catch (error) {
       console.log(error);
     }

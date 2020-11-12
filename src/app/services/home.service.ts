@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { BehaviorSubject, Observable, of } from "rxjs";
 import { catchError, map, tap } from "rxjs/operators";
 import { User } from "../model/user";
@@ -47,6 +47,126 @@ export class HomeService {
     );
   }
 
+  fetchDropdownOptionsList(patType: number = 1) {
+    console.log("Into fetchProceduresNew");
+    let header = new HttpHeaders();
+    header = header.set("Authorization", localStorage.getItem("deviceToken"));
+
+    const hospitalList = new Promise((resolve, reject) => {
+      this.http
+        .get(environment.api.getHospitalsNew, {
+          headers: header,
+        })
+        .subscribe(
+          (apiResponse: any) => {
+            console.log("apiResponse", apiResponse);
+            resolve(apiResponse);
+            //resolve({ status: true, data: apiResponse, statusCode: 200 });
+          },
+          (error: any) => {
+            this.log("fetchProcedures Error @fetchProcedures: " + error);
+            resolve({ status: false, message: error.message });
+          }
+        );
+    });
+
+    const procedureList = new Promise((resolve, reject) => {
+      this.http
+        .get(environment.api.getProceduresNew + "/" + patType, {
+          headers: header,
+        })
+        .subscribe(
+          (apiResponse: any) => {
+            console.log("apiResponse", apiResponse);
+            resolve(apiResponse);
+            //resolve({ status: true, data: apiResponse, statusCode: 200 });
+          },
+          (error: any) => {
+            this.log("fetchProcedures Error @fetchProcedures: " + error);
+            resolve({ status: false, message: error.message });
+          }
+        );
+    });
+
+    const csectionReasonList = new Promise((resolve, reject) => {
+      this.http
+        .get(environment.api.cSectionReasonNew + "/" + patType, {
+          headers: header,
+        })
+        .subscribe(
+          (apiResponse: any) => {
+            console.log("apiResponse", apiResponse);
+            resolve(apiResponse);
+            //resolve({ status: true, data: apiResponse, statusCode: 200 });
+          },
+          (error: any) => {
+            this.log("fetchProcedures Error @fetchProcedures: " + error);
+            resolve({ status: false, message: error.message });
+          }
+        );
+    });
+
+    const cpModeList = new Promise((resolve, reject) => {
+      this.http
+        .get(environment.api.cpModeNew + "/" + patType, {
+          headers: header,
+        })
+        .subscribe(
+          (apiResponse: any) => {
+            console.log("apiResponse", apiResponse);
+            resolve(apiResponse);
+            //resolve({ status: true, data: apiResponse, statusCode: 200 });
+          },
+          (error: any) => {
+            this.log("fetchProcedures Error @fetchProcedures: " + error);
+            resolve({ status: false, message: error.message });
+          }
+        );
+    });
+    const inducedReasonList = new Promise((resolve, reject) => {
+      this.http
+        .get(environment.api.inducedReasonNew + "/" + patType, {
+          headers: header,
+        })
+        .subscribe(
+          (apiResponse: any) => {
+            console.log("apiResponse", apiResponse);
+            resolve(apiResponse);
+            // resolve({ status: true, data: apiResponse, statusCode: 200 });
+          },
+          (error: any) => {
+            this.log("fetchProcedures Error @fetchProcedures: " + error);
+            resolve({ status: false, message: error.message });
+          }
+        );
+    });
+
+    // Using ES6 Promises
+    return Promise.all([
+      hospitalList,
+      procedureList,
+      csectionReasonList,
+      cpModeList,
+      inducedReasonList,
+    ]).then((responses) => {
+      const [
+        hospitalList,
+        procedureList,
+        csectionReasonList,
+        cpModeList,
+        inducedReasonList,
+      ] = responses;
+      return {
+        status: true,
+        hospitalList,
+        procedureList,
+        csectionReasonList,
+        cpModeList,
+        inducedReasonList,
+      };
+    });
+  }
+
   fetchSchedulerData() {
     return this.http.get(
       `${
@@ -78,6 +198,48 @@ export class HomeService {
     );
   }
 
+  dischargePatientNew(endPoinr: any, patientData: any) {
+    let header = new HttpHeaders();
+    header = header.set("Authorization", localStorage.getItem("deviceToken"));
+
+    return new Promise((resolve, reject) => {
+      this.http
+        .put(endPoinr, patientData, { headers: header })
+        .subscribe((apiResponse: any) => {
+          console.log(apiResponse);
+          if (Object.keys(apiResponse).length) {
+            resolve({
+              status: true,
+              data: apiResponse,
+              statusCode: "200",
+            });
+          }
+        });
+    });
+  }
+
+  reAdmitPatientNew(patientData: any) {
+    let header = new HttpHeaders();
+    header = header.set("Authorization", localStorage.getItem("deviceToken"));
+
+    return new Promise((resolve, reject) => {
+      this.http
+        .put(environment.api.reAdmitPatientNew, patientData, {
+          headers: header,
+        })
+        .subscribe((apiResponse: any) => {
+          console.log(apiResponse);
+          if (Object.keys(apiResponse).length) {
+            resolve({
+              status: true,
+              data: apiResponse,
+              statusCode: "200",
+            });
+          }
+        });
+    });
+  }
+
   fetchUnAdimtPatient(userData: any) {
     return this.http.put(
       `${environment.api.baseUrl}patient/unadmitPatient}`,
@@ -97,6 +259,73 @@ export class HomeService {
       `${environment.api.baseUrl}patient/updatePatient`,
       patientData
     );
+  }
+
+  updatePatientDetailsNew(endPoinr: any, patientData: any) {
+    let header = new HttpHeaders();
+    header = header.set("Authorization", localStorage.getItem("deviceToken"));
+
+    return new Promise((resolve, reject) => {
+      this.http.put(endPoinr, patientData, { headers: header }).subscribe(
+        (apiResponse: any) => {
+          console.log(apiResponse);
+          if (Object.keys(apiResponse).length) {
+            resolve({
+              status: true,
+              data: apiResponse,
+              statusCode: "200",
+            });
+          } else {
+            this.log(
+              `submitPatientDetails Error @submitPatientDetails: ${JSON.stringify(
+                apiResponse
+              )}`
+            );
+            resolve({ status: false, message: apiResponse._statusMessage });
+          }
+        },
+        (error: any) => {
+          this.log("Error @submitPatientDetails: " + error);
+          resolve({ status: false, message: error.message });
+        }
+      );
+    });
+  }
+
+  submitPatientDetailsNew(endPoinr: any, patientData: any) {
+    let header = new HttpHeaders();
+    header = header.set("Authorization", localStorage.getItem("deviceToken"));
+
+    console.log(
+      "Submit data to create new patient :",
+      JSON.stringify(patientData)
+    );
+
+    return new Promise((resolve, reject) => {
+      this.http.post(endPoinr, patientData, { headers: header }).subscribe(
+        (apiResponse: any) => {
+          console.log(apiResponse);
+          if (Object.keys(apiResponse).length) {
+            resolve({
+              status: true,
+              data: apiResponse,
+              statusCode: "200",
+            });
+          } else {
+            this.log(
+              `submitPatientDetails  Error @submitPatientDetails: ${JSON.stringify(
+                apiResponse
+              )}`
+            );
+            resolve({ status: false, message: apiResponse._statusMessage });
+          }
+        },
+        (error: any) => {
+          this.log("Error @submitPatientDetails: " + error);
+          resolve({ status: false, message: error.message });
+        }
+      );
+    });
   }
 
   updatePatientPertinentInfo(pertinentInfo: any) {
@@ -171,12 +400,33 @@ export class HomeService {
     console.log(message);
   }
 
-  fetchPatients(url: any, search: string) {
-    return this.http.get(
-      `${environment.api.baseUrl}${url}token=${localStorage.getItem(
-        "deviceToken"
-      )}&type=${search}`
-    );
+  fetchPatients(url: any, search: string, patient_type_id: number) {
+    let header = new HttpHeaders();
+    header = header.set("Authorization", localStorage.getItem("deviceToken"));
+    let queryString = "";
+    if (search === "census") {
+      queryString = "?status=IN";
+    } else {
+      queryString = "?status=OUT";
+    }
+
+    // if (patient_type_id) {
+    //   queryString += "&patient_type_id=" + patient_type_id;
+    // }
+
+    return new Promise((resolve, reject) => {
+      this.http.get(url + queryString, { headers: header }).subscribe(
+        (apiResponse: any) => {
+          console.log("apiResponse", apiResponse);
+
+          resolve({ status: true, data: apiResponse, statusCode: 200 });
+        },
+        (error: any) => {
+          this.log("fetchPatients - Error @fetchPatients: " + error);
+          resolve({ status: false, message: error.message });
+        }
+      );
+    });
   }
 
   fetchOutPatients(url: any) {

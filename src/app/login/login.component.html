@@ -3,28 +3,71 @@
 <div class="login-block">
   <div class="login-form">
     <div class="login-header">
-      <img src="../../assets/logo.png" alt="logo">
+      <img src="../../assets/Logonew.png" alt="logo" />
+
+      <div>
+        <h1 class="title" style="color: #1faa60">insta</h1>
+        <h1 class="subtitle" style="color: #10172f">rounds</h1>
+      </div>
     </div>
     <div class="login-body">
-      <h2>SIGN IN</h2>
+      <h2>Welcome</h2>
+      <p class="subhead">Please enter your details to login</p>
       <form>
         <div class="control-group">
-          <input class="form-input" placeholder="Username" [(ngModel)]="username" name="username" required>
-        </div>
-        <div class="control-group">
-          <input  class="form-input"  placeholder="Password" [(ngModel)]="password" type="password" name="password" required>
+          <mat-form-field class="example-full-width" appearance="outline">
+            <mat-label>Username</mat-label>
+            <input
+              matInput
+              autocomplete="off"
+              name="username"
+              [(ngModel)]="username"
+              required
+            />
+          </mat-form-field>
+
+          <!-- <input
+            class="form-input"
+            placeholder="Username"
+            [(ngModel)]="username"
+            name="username"
+            required
+          /> -->
+
+          <mat-form-field class="example-full-width" appearance="outline">
+            <mat-label>Password</mat-label>
+            <input
+              matInput
+              type="password"
+              autocomplete="off"
+              name="password"
+              [(ngModel)]="password"
+              required
+            />
+          </mat-form-field>
+
+          <!-- <input
+            class="form-input"
+            placeholder="Password"
+            [(ngModel)]="password"
+            type="password"
+            name="password"
+            required
+          /> -->
         </div>
       </form>
       <div class="submit clear-fix">
-        <button class="btn blue-btn" >New User</button>
-        <button  class="btn blue-btn pull-right"  (click)="login()">Sign in</button>
+        <button class="btn blue-btn">New User</button>
+        <button class="btn blue-btn pull-right" (click)="login()">
+          Sign in
+        </button>
       </div>
       <div class="forget">
         <a href="#"><span>Forgot password?</span></a>
       </div>
-      <mat-spinner [style.display]="showSpinner ? 'block' : 'none'"></mat-spinner>
+      <mat-spinner
+        [style.display]="showSpinner ? 'block' : 'none'"
+      ></mat-spinner>
     </div>
   </div>
 </div>
-
-

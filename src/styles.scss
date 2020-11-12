@@ -1,6 +1,31 @@
 /* You can add global styles to this file, and also import other style files */
 @import "~bootstrap/dist/css/bootstrap.css";
 
+@font-face {
+  font-family: abeatbyKai;
+  src: url(assets/fonts/ABEAKRG.TTF) format("opentype");
+}
+
+@font-face {
+  font-family: "PoppinsRegular";
+  src: url("./assets/fonts/Poppins-Regular.ttf");
+}
+
+@font-face {
+  font-family: "PoppinsLight";
+  src: url("./assets/fonts/Poppins-Light.ttf");
+}
+
+@font-face {
+  font-family: "PoppinsSemiBold";
+  src: url("./assets/fonts/Poppins-SemiBold.ttf");
+}
+
+@font-face {
+  font-family: "PoppinsMedium";
+  src: url("./assets/fonts/Poppins-Medium.ttf");
+}
+
 html,
 body {
   height: 100%;
