@@ -34,6 +34,7 @@ import { AboutComponent } from "./about/about.component";
 import { AddgynpatientsComponent } from "./home/addgynpatients/addgynpatients.component";
 import { AddobpatientComponent } from "./home/addobpatient/addobpatient.component";
 import { AddschedulerappointmentComponent } from "./home/addschedulerappointment/addschedulerappointment.component";
+import { SchedulerAddPatientComponent } from "./home/scheduler/scheduler-add-pat.component";
 import { GynPatientsComponent } from "./home/gyn-patients/gyn-patients.component";
 import {
   ObPatientsComponent,
@@ -45,6 +46,7 @@ import {
 } from "./home/out-patients/out-patients.component";
 import { AlertDialogComponent } from "./home/alert-dialog/alert-dialog.component";
 import { SchedulerComponent } from "./home/scheduler/scheduler.component";
+import { SchedulerAppointment } from "./home/scheduler/scheduler-appointment.component";
 import { SettingsComponent } from "./home/settings/settings.component";
 import { UserInfoComponent } from "./home/user-info/user-info.component";
 import { UserListComponent } from "./home/user-list/user-list.component";
@@ -52,6 +54,12 @@ import { ForgotPasswordComponent } from "./forgot-password/forgot-password.compo
 import { NotificationListComponent } from "./notification/notification.component";
 import { NotificationService } from "./notification/notification.service";
 import { InlineEditComponent } from "./inline-edit/inline-edit.component";
+
+import { FlatpickrModule } from "angularx-flatpickr";
+import { CalendarModule, DateAdapter } from "angular-calendar";
+import { adapterFactory } from "angular-calendar/date-adapters/date-fns";
+import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -62,6 +70,7 @@ import { InlineEditComponent } from "./inline-edit/inline-edit.component";
     AboutComponent,
     AddgynpatientsComponent,
     AddobpatientComponent,
+    SchedulerAddPatientComponent,
     AddschedulerappointmentComponent,
     GynPatientsComponent,
     ObPatientsComponent,
@@ -76,6 +85,7 @@ import { InlineEditComponent } from "./inline-edit/inline-edit.component";
     DialogContentOutDialog,
     InlineEditComponent,
     AlertDialogComponent,
+    SchedulerAppointment,
   ],
   imports: [
     BrowserModule,
@@ -99,6 +109,12 @@ import { InlineEditComponent } from "./inline-edit/inline-edit.component";
     MatExpansionModule,
     SatPopoverModule,
     MatProgressSpinnerModule,
+    NgbModule,
+    FlatpickrModule.forRoot(),
+    CalendarModule.forRoot({
+      provide: DateAdapter,
+      useFactory: adapterFactory,
+    }),
   ],
   entryComponents: [
     AppComponent,
@@ -106,6 +122,8 @@ import { InlineEditComponent } from "./inline-edit/inline-edit.component";
     DialogContentOutDialog,
     InlineEditComponent,
     AlertDialogComponent,
+    SchedulerAppointment,
+    SchedulerAddPatientComponent,
   ],
   providers: [CsvDataService, NotificationService],
   bootstrap: [AppComponent],

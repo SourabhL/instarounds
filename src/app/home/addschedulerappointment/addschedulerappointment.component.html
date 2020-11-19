@@ -1,3 +1,129 @@
 I am Add Scheduler
 
 <app-notification></app-notification>
+<ng-template #modalContent let-close="close">
+  <div class="modal-header">
+    <h5 class="modal-title">Patient Appointment</h5>
+    <button type="button" class="close" (click)="close()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div *ngIf="modalData?.action === 'Clicked'">Clicked</div>
+    <div *ngIf="modalData?.action === 'Resized'">
+      <h5>Are you sure to change the Appointment time?</h5>
+      <br />
+      <h6>Patient: {{ modalData?.event.title }}</h6>
+      <br />
+      <p>Appointment Start Time: {{ modalData?.event.start }}</p>
+      <p>Appointment Start Time: {{ modalData?.event.end }}</p>
+    </div>
+    <div *ngIf="modalData?.action === 'hourSegment' && !addPat">
+      <button type="button" class="btn btn-info" (click)="goToAddPatient()">
+        <i class="fa fa-plus-circle"></i> Add New Patient
+      </button>
+
+      <div class="row col-md-12 mx-0 p0 mt-4">
+        <div class="card col-md-12 p0 m0">
+          <div class="card-body no-table-padding">
+            <div class="pull-right">
+              <mat-form-field>
+                <mat-label>Search</mat-label>
+                <input
+                  matInput
+                  (keyup)="applyFilter($event)"
+                  placeholder=""
+                  #input
+                />
+              </mat-form-field>
+            </div>
+          </div>
+          <table mat-table [dataSource]="dataSource" matSort>
+            <ng-container matColumnDef="fullName">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+              <td mat-cell *matCellDef="let row">{{ row.fullName }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="patientType">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                Patient Type
+              </th>
+              <td mat-cell *matCellDef="let row">
+                {{ row.patientType }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="room_number">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                Room Number
+              </th>
+              <td mat-cell *matCellDef="let row">{{ row.room_number }}</td>
+            </ng-container>
+
+            <!-- <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let row">
+                <a href="javascript:;"> view/edit</a>
+              </td>
+            </ng-container> -->
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            <tr class="mat-row" *matNoDataRow>
+              <td class="mat-cell" colspan="4">
+                No data matching the filter "{{ input.value }}"
+              </td>
+            </tr>
+            <!-- Row shown when there is no matching data. -->
+          </table>
+          <mat-paginator
+            [length]="this.patientsList.length"
+            [pageSizeOptions]="[5, 10, 25, 100]"
+            [pageSize]="5"
+          ></mat-paginator>
+        </div>
+        <div class="row col-md-12 p0 mx-0">
+          <hr />
+          <div class="col-md-12 mb-3">
+            <h5 class="text-info">Appointment</h5>
+          </div>
+          <!-- <div class="col-md-4">
+            <mat-form-field appearance="outline" class="example-full-width">
+              <mat-label>Start Time </mat-label>
+              <input
+                matInput
+                type="datetime-local"
+                [(ngModel)]="patientDetails.appointmentStartTime"
+              />
+
+              <mat-datepicker #appointmentStartTime></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <div class="col-md-4">
+            <mat-form-field appearance="outline" class="example-full-width">
+              <mat-label>End Time </mat-label>
+              <input
+                matInput
+                type="datetime-local"
+                [(ngModel)]="patientDetails.appointmentEndTime"
+              />
+
+              <mat-datepicker #appointmentEndTime></mat-datepicker>
+            </mat-form-field>
+          </div> -->
+        </div>
+      </div>
+    </div>
+
+    <!-- <div *ngIf="addPat">
+      <app-add-ob-patients></app-add-ob-patients>
+    </div> -->
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" (click)="close()">
+      Cancel
+    </button>
+    <button type="button" class="btn btn-outline-primary" (click)="close()">
+      OK
+    </button>
+  </div>
+</ng-template>

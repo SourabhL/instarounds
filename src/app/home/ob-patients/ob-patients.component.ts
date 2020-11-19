@@ -16,10 +16,10 @@ import { AlertDialogComponent } from "../alert-dialog/alert-dialog.component";
 
 export interface ObPatientsData {
   fullName: string;
-  roomNumber: string;
+  room_number: string;
   gsPs: string;
   edd: string;
-  admissionStatus: string;
+  admission_status: string;
   actions: string;
 }
 declare var moment: any;
@@ -31,16 +31,50 @@ declare var moment: any;
 export class ObPatientsComponent implements OnInit {
   displayedColumns: string[] = [
     "fullName",
-    "roomNumber",
+    "room_number",
     "gsPs",
     "edd",
-    "admissionStatus",
+    "admission_status",
     "actions",
   ];
   dataSource: MatTableDataSource<ObPatientsData>;
   loading = false;
-  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
-  @ViewChild(MatSort, { static: false }) sort: MatSort;
+  //@ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
+
+  @ViewChild(MatPaginator, { static: false }) set matPaginator(
+    paginator: MatPaginator
+  ) {
+    if (!this.dataSource.paginator) {
+      this.dataSource.paginator = paginator;
+    }
+  }
+
+  @ViewChild(MatSort, { static: false }) set matSort(sort: MatSort) {
+    if (!this.dataSource.sort) {
+      this.dataSource.sort = sort;
+    }
+  }
+
+  obPatientsList = [];
+  gynPatientsList = [];
+  tempPatientsList = [];
+  constructor(
+    private loginSer: HomeService,
+    private appService: NotificationService,
+    private router: Router,
+    public dialog: MatDialog
+  ) {
+    // // Assign the data to the data source for the table to render
+    // this.dataSource = new MatTableDataSource(this.patientsList);
+  }
+
+  ngOnInit() {
+    this.getPatients();
+  }
+
+  async ngAfterViewInit() {
+    //this.dataSource.data =;
+  }
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -72,22 +106,6 @@ export class ObPatientsComponent implements OnInit {
       }
     });
   }
-  obPatientsList = [];
-  gynPatientsList = [];
-  tempPatientsList = [];
-  constructor(
-    private loginSer: HomeService,
-    private appService: NotificationService,
-    private router: Router,
-    public dialog: MatDialog
-  ) {
-    // // Assign the data to the data source for the table to render
-    // this.dataSource = new MatTableDataSource(this.patientsList);
-  }
-
-  ngOnInit() {
-    this.getPatients();
-  }
 
   openMessageDialog(message) {
     const dialogRef = this.dialog.open(AlertDialogComponent, {
@@ -100,7 +118,7 @@ export class ObPatientsComponent implements OnInit {
     });
   }
 
-  getPatients() {
+  async getPatients() {
     console.log("Into get patients");
     this.loading = true;
     this.obPatientsList = [];
@@ -126,11 +144,11 @@ export class ObPatientsComponent implements OnInit {
               ...val,
               fullName: `${val.first_name} ${val.last_name}`,
             }));
-
           this.dataSource = new MatTableDataSource(this.obPatientsList);
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
+          // this.dataSource.paginator = this.paginator;
+          // this.dataSource.sort = this.sort;
           this.loading = false;
+          console.log(this.dataSource);
           console.log("obPatientsList..", this.obPatientsList);
           console.log("gynPatientsList..", this.gynPatientsList);
         } else if (!data.status) {
@@ -168,6 +186,9 @@ export class ObPatientsComponent implements OnInit {
   }
   goToPatients() {
     this.router.navigateByUrl("/ob-patients");
+  }
+  goToSchedulerPage() {
+    this.router.navigateByUrl("/scheduler");
   }
 
   goToOutPatient() {

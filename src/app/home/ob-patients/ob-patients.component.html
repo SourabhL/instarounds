@@ -1,5 +1,5 @@
 <app-notification></app-notification>
-<section class="row mlr0 navbar-block">
+<!-- <section class="row mlr0 navbar-block">
   <div class="col-md-3 logo-wrapper">
     <img class="logo" src="../../assets/Logonew.png" alt="logo" />
 
@@ -23,14 +23,14 @@
         <a href="javascript:void(0)">MD Connect</a>
       </li>
       <li>
-        <a href="javascript:void(0)">Schedule</a>
+        <a href="javascript:void(0)" (click)="goToSchedulerPage()">Schedule</a>
       </li>
       <li>
         <a href="javascript:void(0)" (click)="goToAnlyticsPage()">Analytics</a>
       </li>
     </ul>
   </div>
-</section>
+</section> -->
 
 <section class="spinner__loading" *ngIf="loading">
   <mat-spinner strokeWidth="3" [diameter]="80"></mat-spinner>
@@ -94,7 +94,7 @@
           <td mat-cell *matCellDef="let row">{{ row.fullName }}</td>
         </ng-container>
 
-        <ng-container matColumnDef="roomNumber">
+        <ng-container matColumnDef="room_number">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Room Number</th>
           <td mat-cell *matCellDef="let row">{{ row.room_number }}</td>
         </ng-container>
@@ -114,7 +114,7 @@
           </td>
         </ng-container>
 
-        <ng-container matColumnDef="admissionStatus">
+        <ng-container matColumnDef="admission_status">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>
             Admission Status
           </th>
@@ -143,7 +143,10 @@
           </td>
         </tr>
       </table>
-      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+      <mat-paginator
+        [length]="this.obPatientsList.length"
+        [pageSizeOptions]="[5, 10, 25, 100]"
+      ></mat-paginator>
     </div>
   </div>
   <div *ngIf="gynPatientsList.length" class="row col-md-12 mx-0 p0 mt-4 mb-5">

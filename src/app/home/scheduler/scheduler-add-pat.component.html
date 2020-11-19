@@ -1,70 +1,15 @@
 <app-notification></app-notification>
-<!--
-<section class="row mlr0 navbar-block">
-  <div class="col-md-3">
-    <img class="logo" alt="logo" src="../../assets/logo2.png" />
-  </div>
-  <div class="col-md-9 col-sm-12 col-xs-12 p0">
-    <ul class="custom-breadcrumb">
-      <li>
-        <a href="javascript:void(0)" (click)="gotoDashboardPage()">Dashboard</a>
-      </li>
-      <li>
-        <a
-          href="javascript:void(0)"
-          class="active"
-          (click)="patientsTypeSelection()"
-          >Patients</a
-        >
-      </li>
-      <li>
-        <a href="javascript:void(0)">MD Connect</a>
-      </li>
-      <li>
-        <a href="javascript:void(0)">Schedule</a>
-      </li>
-      <li>
-        <a href="javascript:void(0)" (click)="goToAnlyticsPage()">Analytics</a>
-      </li>
-    </ul>
-  </div>
-</section> -->
 
 <section class="row ob-patients-block mx-0 px-4">
-  <div class="row col-md-12 mx-0 p0 mt-2">
-    <div class="col-md-7 offset-md-5 col-sm-12 col-xs-12 p0">
-      <ul class="custom-breadcrumb pull-right">
-        <li class="ml-2">
-          <button
-            type="button"
-            class="btn btn-success"
-            (click)="patientsTypeSelection()"
-          >
-            Census
-          </button>
-        </li>
-
-        <li class="ml-2 pull-right">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            (click)="goToOutPatient()"
-          >
-            Discharged
-          </button>
-        </li>
-      </ul>
-    </div>
-  </div>
   <div class="row col-md-12 mx-0 p0 mt-4">
     <div class="card col-md-12 p0 m0">
       <div class="card-header text-white bg-info">
         <h5>
-          <i class="fa fa-user" aria-hidden="true"></i> Patient Registration
+          <i class="fa fa-user" aria-hidden="true"></i> Add/Update Patient
         </h5>
       </div>
       <div class="card-body">
-        <div class="row col-md-10 offset-md-1 justify-content-between">
+        <div class="row col-md-12 justify-content-between">
           <div class="col-md-4">
             <mat-form-field class="example-full-width" appearance="outline">
               <mat-label>First Name:</mat-label>
@@ -156,36 +101,6 @@
             </mat-form-field>
           </div>
 
-          <div class="row col-md-4 p0 mx-0">
-            <div class="col-10">
-              <mat-form-field appearance="outline" class="example-full-width">
-                <mat-label>Admit Date</mat-label>
-                <input
-                  matInput
-                  [readonly]="true"
-                  [matDatepicker]="admitDate"
-                  [(ngModel)]="patientDetails.admitted_date"
-                  [min]="admitMinDate"
-                  [max]="admitMaxDate"
-                />
-
-                <mat-datepicker-toggle
-                  matSuffix
-                  [for]="admitDate"
-                ></mat-datepicker-toggle>
-
-                <mat-datepicker #admitDate></mat-datepicker>
-              </mat-form-field>
-            </div>
-            <div class="col-2 pl-0">
-              <mat-hint
-                align="end"
-                matTooltip="Set the date for patient admission. &#13;&#10;&#13;&#10; (NOTE: If the appointment date has been given, no need to fill the admit section)"
-                matTooltipPosition="right"
-                ><i class="fa fa-info-circle fa-lg"></i
-              ></mat-hint>
-            </div>
-          </div>
           <!-- OB Fields -->
           <div
             class="row col-md-12 p0 mx-0"
@@ -343,7 +258,7 @@
                 </div> -->
               </div>
 
-              <div class="col-md-4 inducedReason">
+              <div class="col-md-12 inducedReason">
                 <div class="col-md-4 mt-2 mb-1 p0">
                   <h5 class="text-secondary">Induced:</h5>
                 </div>
@@ -922,7 +837,11 @@
             </div>
             <mat-form-field appearance="outline" class="example-full-width">
               <mat-label>Add Pertinent Info</mat-label>
-              <textarea matInput [(ngModel)]="patientDetails.pertinent_info">
+              <textarea
+                matInput
+                [value]="patientDetails.pertinent_info"
+                [(ngModel)]="patientDetails.pertinent_info"
+              >
               </textarea>
             </mat-form-field>
           </div>
@@ -972,7 +891,7 @@
             <button
               mat-raised-button
               class="btn actionButtons"
-              (click)="patientsTypeSelection()"
+              (click)="activeModal.close('Close click')"
             >
               Cancel
             </button>
